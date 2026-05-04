@@ -1,0 +1,7 @@
+{
+  "variants": {
+    "": {
+      "model": "flux_overdrive:block/ender_flux_storage"
+    }
+  }
+}

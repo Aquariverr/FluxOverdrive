@@ -1,0 +1,22 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "group": "flux_overdrive",
+  "pattern": [
+    "fcf",
+    "cfc",
+    "fcf"
+  ],
+  "key": {
+    "c": {
+      "item": "flux_overdrive:nether_flux_core"
+    },
+    "f": {
+      "item": "flux_overdrive:nether_flux_dust"
+    }
+  },
+  "result": {
+    "id": "flux_overdrive:nether_flux_block",
+    "count": 1
+  }
+}

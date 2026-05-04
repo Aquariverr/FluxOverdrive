@@ -1,0 +1,22 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "group": "flux_overdrive",
+  "pattern": [
+    " d ",
+    "ded",
+    " d "
+  ],
+  "key": {
+    "d": {
+      "item": "flux_overdrive:ender_flux_dust"
+    },
+    "e": {
+      "item": "minecraft:dragon_egg"
+    }
+  },
+  "result": {
+    "id": "flux_overdrive:ender_flux_core",
+    "count": 1
+  }
+}

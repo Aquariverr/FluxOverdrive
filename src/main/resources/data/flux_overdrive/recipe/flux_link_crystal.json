@@ -1,0 +1,22 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "group": "flux_overdrive",
+  "pattern": [
+    "d d",
+    " q ",
+    "d d"
+  ],
+  "key": {
+    "d": {
+      "item": "fluxnetworks:flux_dust"
+    },
+    "q": {
+      "item": "minecraft:quartz_block"
+    }
+  },
+  "result": {
+    "id": "flux_overdrive:flux_link_crystal",
+    "count": 1
+  }
+}

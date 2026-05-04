@@ -1,0 +1,332 @@
+package com.aquariverr.fluxod.block.entity;
+
+import com.aquariverr.fluxod.Config;
+import com.aquariverr.fluxod.register.FluxOdDataComponents;
+import com.aquariverr.fluxod.register.RegistryBlockEntityTypes;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.core.GlobalPos;
+import net.minecraft.core.component.DataComponentMap;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.ListTag;
+import net.minecraft.nbt.NbtUtils;
+import net.minecraft.nbt.Tag;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.component.CustomData;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.state.BlockState;
+import net.neoforged.neoforge.capabilities.BlockCapability;
+import net.neoforged.neoforge.energy.IEnergyStorage;
+import org.jetbrains.annotations.NotNull;
+import sonar.fluxnetworks.api.FluxConstants;
+import sonar.fluxnetworks.api.device.FluxDeviceType;
+import sonar.fluxnetworks.api.device.IFluxPoint;
+import sonar.fluxnetworks.api.energy.IBlockEnergyConnector;
+import sonar.fluxnetworks.api.energy.IFNEnergyStorage;
+import sonar.fluxnetworks.common.device.FluxConnectorHandler;
+import sonar.fluxnetworks.common.device.TileFluxConnector;
+import sonar.fluxnetworks.common.util.EnergyUtils;
+
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+import javax.annotation.ParametersAreNonnullByDefault;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+
+@ParametersAreNonnullByDefault
+public class TileFluxLinkCrystal extends TileFluxConnector implements IFluxPoint {
+
+    private final WirelessPointHandler mHandler = new WirelessPointHandler();
+    private final List<LinkTarget> linkedTargets = new ArrayList<>();
+
+    @Nullable
+    private EnergyStorage mEnergyCap;
+
+    public TileFluxLinkCrystal(BlockPos pos, BlockState state) {
+        super(RegistryBlockEntityTypes.FLUX_LINK_CRYSTAL.get(), pos, state);
+        mHandler.setLimit(Config.feStorageTransfer);
+        mHandler.setCapacity(Config.feStorageCapacity);
+    }
+
+    @Nonnull
+    @Override
+    public FluxDeviceType getDeviceType() {
+        return FluxDeviceType.POINT;
+    }
+
+    @Nonnull
+    @Override
+    public FluxConnectorHandler getTransferHandler() {
+        return mHandler;
+    }
+
+    @Nullable
+    @Override
+    @SuppressWarnings("unchecked")
+    public <T> T getEnergyCapability(BlockCapability<T, Direction> cap, @Nullable Direction side) {
+        if (!isRemoved()) {
+            if (mEnergyCap == null) {
+                mEnergyCap = new EnergyStorage();
+            }
+            return (T) mEnergyCap;
+        }
+        return null;
+    }
+
+    @Override
+    @SuppressWarnings("NonExtendableApiUsage")
+    public void invalidateCapabilities() {
+        mEnergyCap = null;
+        super.invalidateCapabilities();
+    }
+
+    @Nonnull
+    @Override
+    public ItemStack getDisplayStack() {
+        return new ItemStack(getBlockState().getBlock());
+    }
+
+    @Override
+    protected void onFirstTick() {
+        connect(sonar.fluxnetworks.common.connection.FluxNetworkData.getNetwork(getNetworkID()));
+    }
+
+    public void addLink(BlockPos targetPos, Direction side) {
+        if (level == null) return;
+        removeLink(targetPos);
+        linkedTargets.add(new LinkTarget(GlobalPos.of(level.dimension(), targetPos), side));
+        if (!level.isClientSide) {
+            setChanged();
+            level.sendBlockUpdated(worldPosition, getBlockState(), getBlockState(), 3);
+        }
+    }
+
+    public void removeLink(BlockPos targetPos) {
+        linkedTargets.removeIf(d -> d.pos.pos().equals(targetPos));
+        if (level != null && !level.isClientSide) {
+            setChanged();
+            level.sendBlockUpdated(worldPosition, getBlockState(), getBlockState(), 3);
+        }
+    }
+
+    public boolean isLinked(BlockPos targetPos) {
+        for (LinkTarget d : linkedTargets) {
+            if (d.pos.pos().equals(targetPos)) return true;
+        }
+        return false;
+    }
+
+    public List<LinkTarget> getLinkedTargets() {
+        return linkedTargets;
+    }
+
+    @Override
+    public void writeCustomTag(CompoundTag tag, byte type) {
+        super.writeCustomTag(tag, type);
+        if (type == FluxConstants.NBT_TILE_SETTINGS) return;
+        ListTag links = new ListTag();
+        for (LinkTarget d : linkedTargets) {
+            CompoundTag linkTag = new CompoundTag();
+            linkTag.put("pos", NbtUtils.writeBlockPos(d.pos.pos()));
+            linkTag.putString("dimension", d.pos.dimension().location().toString());
+            linkTag.putString("side", d.side.getName());
+            links.add(linkTag);
+        }
+        tag.put("wirelessLinks", links);
+    }
+
+    @Override
+    public void readCustomTag(CompoundTag tag, byte type) {
+        super.readCustomTag(tag, type);
+        if (type == FluxConstants.NBT_TILE_SETTINGS) return;
+        linkedTargets.clear();
+        if (tag.contains("wirelessLinks")) {
+            ListTag links = tag.getList("wirelessLinks", Tag.TAG_COMPOUND);
+            for (int i = 0; i < links.size(); i++) {
+                CompoundTag linkTag = links.getCompound(i);
+                BlockPos pos = NbtUtils.readBlockPos(linkTag, "pos").orElse(null);
+                if (pos == null) continue;
+                ResourceLocation dimId = ResourceLocation.parse(linkTag.getString("dimension"));
+                ResourceKey<Level> dim = ResourceKey.create(Registries.DIMENSION, dimId);
+                Direction side = Direction.byName(linkTag.getString("side"));
+                if (side == null) continue;
+                linkedTargets.add(new LinkTarget(GlobalPos.of(dim, pos), side));
+            }
+        }
+    }
+
+    @Override
+    protected void collectImplicitComponents(DataComponentMap.Builder builder) {
+        super.collectImplicitComponents(builder);
+        CompoundTag linkTag = new CompoundTag();
+        ListTag links = new ListTag();
+        for (LinkTarget d : linkedTargets) {
+            CompoundTag entry = new CompoundTag();
+            entry.put("pos", NbtUtils.writeBlockPos(d.pos.pos()));
+            entry.putString("dimension", d.pos.dimension().location().toString());
+            entry.putString("side", d.side.getName());
+            links.add(entry);
+        }
+        if (!links.isEmpty()) {
+            linkTag.put("links", links);
+            builder.set(FluxOdDataComponents.LINK_TARGETS, CustomData.of(linkTag));
+        }
+    }
+
+    @Override
+    protected void applyImplicitComponents(BlockEntity.@NotNull DataComponentInput input) {
+        super.applyImplicitComponents(input);
+        CustomData data = input.get(FluxOdDataComponents.LINK_TARGETS);
+        if (data != null) {
+            CompoundTag linkTag = data.copyTag();
+            if (linkTag.contains("links")) {
+                ListTag links = linkTag.getList("links", Tag.TAG_COMPOUND);
+                linkedTargets.clear();
+                for (int i = 0; i < links.size(); i++) {
+                    CompoundTag entry = links.getCompound(i);
+                    BlockPos pos = NbtUtils.readBlockPos(entry, "pos").orElse(null);
+                    if (pos == null) continue;
+                    ResourceLocation dimId = ResourceLocation.parse(entry.getString("dimension"));
+                    ResourceKey<Level> dim = ResourceKey.create(Registries.DIMENSION, dimId);
+                    Direction side = Direction.byName(entry.getString("side"));
+                    if (side == null) continue;
+                    linkedTargets.add(new LinkTarget(GlobalPos.of(dim, pos), side));
+                }
+            }
+        }
+    }
+
+    public static class LinkTarget {
+        public final GlobalPos pos;
+        public final Direction side;
+
+        public LinkTarget(GlobalPos pos, Direction side) {
+            this.pos = pos;
+            this.side = side;
+        }
+
+        @Nullable
+        public BlockEntity getTarget(Level level) {
+            if (level instanceof ServerLevel && pos.dimension() == level.dimension()) {
+                BlockPos p = pos.pos();
+                if (level.isLoaded(p)) {
+                    return level.getBlockEntity(p);
+                }
+            }
+            return null;
+        }
+    }
+
+    public class WirelessPointHandler extends FluxConnectorHandler {
+
+        private long mDesired;
+        private long mCapacity;
+
+        public void setCapacity(long capacity) {
+            mCapacity = capacity;
+        }
+
+        public long getCapacity() {
+            return mCapacity;
+        }
+
+        @Override
+        public void onCycleStart() {
+            mDesired = sendToWirelessTargets(getLimit(), true);
+        }
+
+        @Override
+        public void onCycleEnd() {
+            mBuffer += mChange = -sendToWirelessTargets(Math.min(mBuffer, getLimit()), false);
+        }
+
+        @Override
+        public void addToBuffer(long energy) {
+            mBuffer += energy;
+        }
+
+        @Override
+        public long getRequest() {
+            return Math.max(mDesired - mBuffer, 0);
+        }
+
+        private long sendToWirelessTargets(long energy, boolean simulate) {
+            long leftover = energy;
+            Iterator<LinkTarget> it = linkedTargets.iterator();
+            while (it.hasNext()) {
+                LinkTarget device = it.next();
+                if (leftover <= 0) return energy;
+                if (device.pos == null || device.pos.dimension() != level.dimension()) continue;
+
+                BlockEntity target = device.getTarget(level);
+                if (target == null) continue;
+
+                IBlockEnergyConnector connector = EnergyUtils.getConnector(target, device.side);
+                if (connector == null || !connector.canSendTo(target, device.side)) continue;
+
+                long sent = connector.sendTo(leftover, target, device.side, simulate);
+                leftover -= sent;
+            }
+            return energy - leftover;
+        }
+    }
+
+    private class EnergyStorage implements IEnergyStorage, IFNEnergyStorage {
+
+        @Override
+        public int receiveEnergy(int maxReceive, boolean simulate) {
+            return 0;
+        }
+
+        @Override
+        public int extractEnergy(int maxExtract, boolean simulate) {
+            return 0;
+        }
+
+        @Override
+        public int getEnergyStored() {
+            return (int) Math.min(getEnergyStoredL(), Integer.MAX_VALUE);
+        }
+
+        @Override
+        public int getMaxEnergyStored() {
+            return (int) Math.min(getMaxEnergyStoredL(), Integer.MAX_VALUE);
+        }
+
+        @Override
+        public boolean canExtract() {
+            return false;
+        }
+
+        @Override
+        public boolean canReceive() {
+            return false;
+        }
+
+        @Override
+        public long receiveEnergyL(long maxReceive, boolean simulate) {
+            return 0;
+        }
+
+        @Override
+        public long extractEnergyL(long maxExtract, boolean simulate) {
+            return 0;
+        }
+
+        @Override
+        public long getEnergyStoredL() {
+            return mHandler.getBuffer();
+        }
+
+        @Override
+        public long getMaxEnergyStoredL() {
+            return Math.max(mHandler.getBuffer(), mHandler.getLimit());
+        }
+    }
+}

@@ -1,0 +1,22 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "group": "flux_overdrive",
+  "pattern": [
+    " n ",
+    "npn",
+    " n "
+  ],
+  "key": {
+    "n": {
+      "item": "flux_overdrive:nether_flux_dust"
+    },
+    "p": {
+      "item": "minecraft:ender_pearl"
+    }
+  },
+  "result": {
+    "id": "flux_overdrive:ender_flux_dust",
+    "count": 1
+  }
+}

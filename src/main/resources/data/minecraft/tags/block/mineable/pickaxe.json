@@ -1,0 +1,12 @@
+{
+  "replace": false,
+  "values": [
+    "flux_overdrive:ender_flux_block",
+    "flux_overdrive:nether_flux_block",
+    "flux_overdrive:ender_flux_storage",
+    "flux_overdrive:nether_flux_storage",
+    "flux_overdrive:flux_storage_terminal",
+    "flux_overdrive:flux_fe_storage",
+    "flux_overdrive:flux_link_crystal"
+  ]
+}

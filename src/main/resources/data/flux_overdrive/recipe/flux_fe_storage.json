@@ -1,0 +1,22 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "group": "flux_overdrive",
+  "pattern": [
+    "d d",
+    " r ",
+    "d d"
+  ],
+  "key": {
+    "d": {
+      "item": "fluxnetworks:flux_dust"
+    },
+    "r": {
+      "item": "minecraft:redstone_block"
+    }
+  },
+  "result": {
+    "id": "flux_overdrive:flux_fe_storage",
+    "count": 1
+  }
+}

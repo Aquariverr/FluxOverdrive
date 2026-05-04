@@ -1,0 +1,32 @@
+{
+  "type": "minecraft:block",
+  "pools": [
+    {
+      "rolls": 1.0,
+      "bonus_rolls": 0.0,
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "flux_overdrive:flux_storage_terminal",
+          "functions": [
+            {
+              "function": "minecraft:copy_components",
+              "include": [
+                "fluxnetworks:device_config",
+                "fluxnetworks:stored_energy",
+                "flux_overdrive:total_capacity",
+                "minecraft:block_entity_data"
+              ],
+              "source": "block_entity"
+            }
+          ]
+        }
+      ],
+      "conditions": [
+        {
+          "condition": "minecraft:survives_explosion"
+        }
+      ]
+    }
+  ]
+}

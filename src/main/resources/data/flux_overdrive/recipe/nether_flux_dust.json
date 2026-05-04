@@ -1,0 +1,22 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "group": "flux_overdrive",
+  "pattern": [
+    " f ",
+    "fnf",
+    " f "
+  ],
+  "key": {
+    "f": {
+      "item": "fluxnetworks:flux_dust"
+    },
+    "n": {
+      "item": "minecraft:netherite_ingot"
+    }
+  },
+  "result": {
+    "id": "flux_overdrive:nether_flux_dust",
+    "count": 1
+  }
+}

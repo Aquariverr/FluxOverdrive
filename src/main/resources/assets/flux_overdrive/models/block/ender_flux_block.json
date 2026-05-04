@@ -1,0 +1,6 @@
+{
+  "parent": "block/cube_all",
+  "textures": {
+    "all": "flux_overdrive:block/ender_flux_block"
+  }
+}

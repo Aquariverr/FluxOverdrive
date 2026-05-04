@@ -1,0 +1,8 @@
+{
+  "replace": false,
+  "values": [
+    "flux_overdrive:ender_flux_storage",
+    "flux_overdrive:nether_flux_storage",
+    "flux_overdrive:flux_storage_terminal"
+  ]
+}

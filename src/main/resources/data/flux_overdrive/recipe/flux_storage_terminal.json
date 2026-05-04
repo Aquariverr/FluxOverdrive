@@ -1,0 +1,25 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "group": "flux_overdrive",
+  "pattern": [
+    "dcd",
+    "cbc",
+    "dcd"
+  ],
+  "key": {
+    "d": {
+      "item": "flux_overdrive:nether_flux_dust"
+    },
+    "c": {
+      "item": "flux_overdrive:nether_flux_core"
+    },
+    "b": {
+      "item": "flux_overdrive:nether_flux_block"
+    }
+  },
+  "result": {
+    "id": "flux_overdrive:flux_storage_terminal",
+    "count": 1
+  }
+}

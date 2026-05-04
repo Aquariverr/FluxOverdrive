@@ -1,0 +1,22 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "group": "flux_overdrive",
+  "pattern": [
+    "  c",
+    " i ",
+    "i  "
+  ],
+  "key": {
+    "i": {
+      "item": "minecraft:iron_ingot"
+    },
+    "c": {
+      "item": "flux_overdrive:nether_flux_core"
+    }
+  },
+  "result": {
+    "id": "flux_overdrive:flux_link_tool",
+    "count": 1
+  }
+}

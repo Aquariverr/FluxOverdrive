@@ -1,0 +1,7 @@
+{
+  "variants": {
+    "": {
+      "model": "flux_overdrive:block/nether_flux_block"
+    }
+  }
+}
