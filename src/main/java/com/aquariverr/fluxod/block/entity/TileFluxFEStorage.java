@@ -193,12 +193,12 @@ public class TileFluxFEStorage extends TileFluxConnector implements IFluxPoint {
 
         @Override
         public int receiveEnergy(int maxReceive, boolean simulate) {
-            return 0;
+            return (int) receiveEnergyL(maxReceive, simulate);
         }
 
         @Override
         public int extractEnergy(int maxExtract, boolean simulate) {
-            return 0;
+            return (int) extractEnergyL(maxExtract, simulate);
         }
 
         @Override
@@ -213,22 +213,36 @@ public class TileFluxFEStorage extends TileFluxConnector implements IFluxPoint {
 
         @Override
         public boolean canExtract() {
-            return false;
+            return mHandler.getFEBuffer() > 0;
         }
 
         @Override
         public boolean canReceive() {
-            return false;
+            return mHandler.getFEBuffer() < mHandler.getFECapacity();
         }
 
         @Override
         public long receiveEnergyL(long maxReceive, boolean simulate) {
-            return 0;
+            long space = mHandler.getFECapacity() - mHandler.getFEBuffer();
+            long received = Math.min(maxReceive, space);
+            if (!simulate && received > 0) {
+                mHandler.setFEBuffer(mHandler.getFEBuffer() + received);
+                mHandler.addExternalChange(received);
+                markEnergyChanged();
+            }
+            return received;
         }
 
         @Override
         public long extractEnergyL(long maxExtract, boolean simulate) {
-            return 0;
+            long available = mHandler.getFEBuffer();
+            long extracted = Math.min(maxExtract, available);
+            if (!simulate && extracted > 0) {
+                mHandler.setFEBuffer(available - extracted);
+                mHandler.addExternalChange(-extracted);
+                markEnergyChanged();
+            }
+            return extracted;
         }
 
         @Override

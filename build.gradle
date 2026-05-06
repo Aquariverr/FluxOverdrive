@@ -51,6 +51,27 @@ repositories {
     maven {
         url "https://modmaven.dev/"
     }
+    maven {
+        name 'Configuration'
+        url 'https://repo.repsy.io/mvn/toma/public/'
+    }
+    maven {
+        name 'Configuration (alternative/backup)'
+        url 'https://api.repsy.io/mvn/toma/public/'
+    }
+    maven {
+        url "https://maven.latvian.dev/releases"
+        content {
+            includeGroup "dev.latvian.mods"
+            includeGroup "dev.latvian.apps"
+        }
+    }
+    maven {
+        url 'https://jitpack.io'
+        content {
+            includeGroup "com.github.rtyley"
+        }
+    }
     mavenCentral()
     mavenLocal()
 }
@@ -164,6 +185,9 @@ dependencies {
     // FluxNetworks
     implementation "curse.maven:fluxnetworks-248020:${fluxnetworks_version}"
 
+    //SFM
+    implementation "curse.maven:super-factory-manager-306935:7736527"
+
     //MEK
     compileOnly "mekanism:Mekanism:${deps_mekanism}:api"
     localRuntime "mekanism:Mekanism:${deps_mekanism}"
@@ -184,6 +208,13 @@ dependencies {
     implementation("com.gregtechceu.gtceu:gtceu-${mod_minecraft}:${deps_gregtech_ceum}") {
        exclude(group: "maven.modrinth", module: "embeddium")
     }
+
+    //configuration
+    implementation "dev.toma.configuration:configuration-1.21.1:${deps_configuration}"
+
+    //kubejs required by GregTech CEu Modern 8.0.0SNAPSHOT
+    implementation "dev.latvian.mods:kubejs-neoforge:${deps_kubejs}"
+
     // Modern UI
     implementation("icyllis.modernui:ModernUI-NeoForge:${deps_modernui}") {
         exclude(group: "org.apache.logging.log4j", module: "log4j-core")
@@ -201,7 +232,7 @@ dependencies {
         exclude(group: "com.ibm.icu", module: "icu4j")
         exclude(group: "it.unimi.dsi", module: "fastutil")
     })
-    additionalRuntimeClasspath(compileOnly("icyllis.modernui:ModernUI-Markdown:${deps_modernui_core}") {
+    additionalRuntimeClasspath(compileOnly("icyllis.modernui:ModernUI-Markdown:${deps_modernui_markdown}") {
         exclude(group: "org.apache.logging.log4j", module: "log4j-core")
         exclude(group: "org.apache.logging.log4j", module: "log4j-api")
         exclude(group: "com.google.code.findbugs", module: "jsr305")

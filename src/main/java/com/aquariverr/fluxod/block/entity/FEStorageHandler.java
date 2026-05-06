@@ -14,6 +14,7 @@ public class FEStorageHandler extends FluxConnectorHandler {
     private long mFEBuffer;
     private long mFECapacity;
     private long mDesired;
+    private long mExternalChange;
 
     FEStorageHandler(long baseTransfer, long baseCapacity) {
         setLimit(baseTransfer);
@@ -39,6 +40,10 @@ public class FEStorageHandler extends FluxConnectorHandler {
         mFEBuffer = Math.min(energy, mFECapacity);
     }
 
+    void addExternalChange(long delta) {
+        mExternalChange += delta;
+    }
+
     void clearNetworkBuffer() {
         mBuffer = 0;
     }
@@ -58,7 +63,8 @@ public class FEStorageHandler extends FluxConnectorHandler {
 
         long sent = sendToConsumers(Math.min(mFEBuffer, getLimit()), false);
         mFEBuffer -= sent;
-        mChange = -sent;
+        mChange = -sent + mExternalChange;
+        mExternalChange = 0;
     }
 
     @Override
@@ -83,6 +89,7 @@ public class FEStorageHandler extends FluxConnectorHandler {
         super.readCustomTag(tag, type);
         if (type == FluxConstants.NBT_SAVE_ALL || type == FluxConstants.NBT_TILE_DROP) {
             mBuffer = 0;
+            mExternalChange = 0;
         }
     }
 

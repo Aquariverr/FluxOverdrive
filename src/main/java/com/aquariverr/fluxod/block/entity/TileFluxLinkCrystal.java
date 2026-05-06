@@ -132,11 +132,7 @@ public class TileFluxLinkCrystal extends TileFluxConnector implements IFluxPoint
         if (type == FluxConstants.NBT_TILE_SETTINGS) return;
         ListTag links = new ListTag();
         for (LinkTarget d : linkedTargets) {
-            CompoundTag linkTag = new CompoundTag();
-            linkTag.put("pos", NbtUtils.writeBlockPos(d.pos.pos()));
-            linkTag.putString("dimension", d.pos.dimension().location().toString());
-            linkTag.putString("side", d.side.getName());
-            links.add(linkTag);
+            links.add(writeLinkToTag(d));
         }
         tag.put("wirelessLinks", links);
     }
@@ -146,34 +142,18 @@ public class TileFluxLinkCrystal extends TileFluxConnector implements IFluxPoint
         super.readCustomTag(tag, type);
         if (type == FluxConstants.NBT_TILE_SETTINGS) return;
         linkedTargets.clear();
-        if (tag.contains("wirelessLinks")) {
-            ListTag links = tag.getList("wirelessLinks", Tag.TAG_COMPOUND);
-            for (int i = 0; i < links.size(); i++) {
-                CompoundTag linkTag = links.getCompound(i);
-                BlockPos pos = NbtUtils.readBlockPos(linkTag, "pos").orElse(null);
-                if (pos == null) continue;
-                ResourceLocation dimId = ResourceLocation.parse(linkTag.getString("dimension"));
-                ResourceKey<Level> dim = ResourceKey.create(Registries.DIMENSION, dimId);
-                Direction side = Direction.byName(linkTag.getString("side"));
-                if (side == null) continue;
-                linkedTargets.add(new LinkTarget(GlobalPos.of(dim, pos), side));
-            }
-        }
+        readLinksFromList(tag, "wirelessLinks");
     }
 
     @Override
     protected void collectImplicitComponents(DataComponentMap.Builder builder) {
         super.collectImplicitComponents(builder);
-        CompoundTag linkTag = new CompoundTag();
         ListTag links = new ListTag();
         for (LinkTarget d : linkedTargets) {
-            CompoundTag entry = new CompoundTag();
-            entry.put("pos", NbtUtils.writeBlockPos(d.pos.pos()));
-            entry.putString("dimension", d.pos.dimension().location().toString());
-            entry.putString("side", d.side.getName());
-            links.add(entry);
+            links.add(writeLinkToTag(d));
         }
         if (!links.isEmpty()) {
+            CompoundTag linkTag = new CompoundTag();
             linkTag.put("links", links);
             builder.set(FluxOdDataComponents.LINK_TARGETS, CustomData.of(linkTag));
         }
@@ -184,22 +164,39 @@ public class TileFluxLinkCrystal extends TileFluxConnector implements IFluxPoint
         super.applyImplicitComponents(input);
         CustomData data = input.get(FluxOdDataComponents.LINK_TARGETS);
         if (data != null) {
-            CompoundTag linkTag = data.copyTag();
-            if (linkTag.contains("links")) {
-                ListTag links = linkTag.getList("links", Tag.TAG_COMPOUND);
-                linkedTargets.clear();
-                for (int i = 0; i < links.size(); i++) {
-                    CompoundTag entry = links.getCompound(i);
-                    BlockPos pos = NbtUtils.readBlockPos(entry, "pos").orElse(null);
-                    if (pos == null) continue;
-                    ResourceLocation dimId = ResourceLocation.parse(entry.getString("dimension"));
-                    ResourceKey<Level> dim = ResourceKey.create(Registries.DIMENSION, dimId);
-                    Direction side = Direction.byName(entry.getString("side"));
-                    if (side == null) continue;
-                    linkedTargets.add(new LinkTarget(GlobalPos.of(dim, pos), side));
-                }
+            readLinksFromList(data.copyTag(), "links");
+        }
+    }
+
+    private CompoundTag writeLinkToTag(LinkTarget d) {
+        CompoundTag tag = new CompoundTag();
+        tag.put("pos", NbtUtils.writeBlockPos(d.pos.pos()));
+        tag.putString("dimension", d.pos.dimension().location().toString());
+        tag.putString("side", d.side.getName());
+        return tag;
+    }
+
+    private void readLinksFromList(CompoundTag root, String key) {
+        if (!root.contains(key)) return;
+        linkedTargets.clear();
+        ListTag links = root.getList(key, Tag.TAG_COMPOUND);
+        for (int i = 0; i < links.size(); i++) {
+            LinkTarget target = readLinkFromTag(links.getCompound(i));
+            if (target != null) {
+                linkedTargets.add(target);
             }
         }
+    }
+
+    @Nullable
+    private LinkTarget readLinkFromTag(CompoundTag tag) {
+        BlockPos pos = NbtUtils.readBlockPos(tag, "pos").orElse(null);
+        if (pos == null) return null;
+        ResourceLocation dimId = ResourceLocation.parse(tag.getString("dimension"));
+        ResourceKey<Level> dim = ResourceKey.create(Registries.DIMENSION, dimId);
+        Direction side = Direction.byName(tag.getString("side"));
+        if (side == null) return null;
+        return new LinkTarget(GlobalPos.of(dim, pos), side);
     }
 
     public static class LinkTarget {
