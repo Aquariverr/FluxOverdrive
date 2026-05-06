@@ -24,6 +24,13 @@ public class FluxOverdriveClient {
     }
 
     @SubscribeEvent
+    static void registerItemColorHandlers(RegisterColorHandlersEvent.Item event) {
+        event.register(FluxColorHandler.INSTANCE,
+                RegistryBlocks.FLUX_FE_STORAGE.get(),
+                RegistryBlocks.FLUX_LINK_CRYSTAL.get());
+    }
+
+    @SubscribeEvent
     static void registerEntityRenderers(EntityRenderersEvent.RegisterRenderers event) {
         event.registerBlockEntityRenderer(RegistryBlockEntityTypes.ENDER_FLUX_STORAGE.get(), FluxStorageEntityRenderer.PROVIDER);
         event.registerBlockEntityRenderer(RegistryBlockEntityTypes.NETHER_FLUX_STORAGE.get(), FluxStorageEntityRenderer.PROVIDER);
