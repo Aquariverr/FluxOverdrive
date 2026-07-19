@@ -16,7 +16,8 @@
   "tooltip.flux_overdrive.flux_fe_storage": "FluxPoint with built-in FE buffer, separate from network buffer",
   "tooltip.flux_overdrive.flux_fe_storage.capacity": "Can accept Flux Storage units via automation to increase capacity",
   "tooltip.flux_overdrive.flux_link_tool.bound": "Bound to: %1$s in %2$s",
-  "tooltip.flux_overdrive.flux_link_tool.unbound": "Shift-right-click a Flux Link Crystal to bind",
+  "tooltip.flux_overdrive.flux_link_tool.desc": "Shift-right-click crystal to bind\nRight-click block to create link\nShift-right-click air to unbind crystal",
+  "tooltip.flux_overdrive.flux_link_tool.unbound": "No crystal bound",
 
   "tooltip.flux_overdrive.flux_link_crystal": "Wireless energy point: use Flux Link Tool to bind machines",
 
@@ -35,5 +36,13 @@
   "flux_overdrive.configuration.netherCapacity": "Nether Flux Storage - Energy Capacity (FE)",
   "flux_overdrive.configuration.netherTransfer": "Nether Flux Storage - Transfer Limit (FE/t)",
   "flux_overdrive.configuration.feStorageCapacity": "Flux FE Storage - Default Energy Capacity (FE)",
-  "flux_overdrive.configuration.feStorageTransfer": "Flux FE Storage - Default Transfer Limit (FE/t)"
+  "flux_overdrive.configuration.feStorageTransfer": "Flux FE Storage - Default Transfer Limit (FE/t)",
+
+  "jade.flux_overdrive.links": "Links",
+
+  "config.jade.plugin_flux_overdrive.flux_device": "Flux Device Info",
+  "config.jade.plugin_flux_overdrive.flux_overdrive_storage": "Flux Overdrive Storage Info",
+  "config.jade.plugin_flux_overdrive.flux_fe_storage": "Flux FE Storage Info",
+  "config.jade.plugin_flux_overdrive.remove_builtin": "Remove Built-in Info",
+  "config.jade.plugin_flux_overdrive.flux_link_crystal": "Flux Link Crystal Info"
 }

@@ -97,6 +97,10 @@ public class FluxLinkToolItem extends Item {
 
     @Override
     public void appendHoverText(ItemStack stack, TooltipContext context, List<Component> tooltip, TooltipFlag flag) {
+        String desc = Component.translatable("tooltip.flux_overdrive.flux_link_tool.desc").getString();
+        for (String line : desc.split("\n")) {
+            tooltip.add(Component.literal(line).withStyle(ChatFormatting.GRAY));
+        }
         if (isBound(stack)) {
             GlobalPos pos = getBound(stack);
             tooltip.add(Component.translatable("tooltip.flux_overdrive.flux_link_tool.bound",

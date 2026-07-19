@@ -4,11 +4,16 @@ import com.aquariverr.fluxod.Config;
 import com.aquariverr.fluxod.register.RegistryBlockEntityTypes;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
+import net.neoforged.neoforge.items.ItemStackHandler;
+import sonar.fluxnetworks.api.FluxDataComponents;
+import sonar.fluxnetworks.common.block.FluxStorageBlock;
 import sonar.fluxnetworks.common.device.FluxStorageHandler;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
 public abstract class TileFluxStorage extends sonar.fluxnetworks.common.device.TileFluxStorage {
 
@@ -21,7 +26,7 @@ public abstract class TileFluxStorage extends sonar.fluxnetworks.common.device.T
 
         public Ender(@Nonnull BlockPos pos, @Nonnull BlockState state) {
             super(RegistryBlockEntityTypes.ENDER_FLUX_STORAGE.get(), pos, state,
-                    new EnderHandler());
+                    new ConfigStorageHandler(Config.enderTransfer, Config.enderCapacity));
         }
 
         @Nonnull
@@ -35,7 +40,7 @@ public abstract class TileFluxStorage extends sonar.fluxnetworks.common.device.T
 
         public Nether(@Nonnull BlockPos pos, @Nonnull BlockState state) {
             super(RegistryBlockEntityTypes.NETHER_FLUX_STORAGE.get(), pos, state,
-                    new NetherHandler());
+                    new ConfigStorageHandler(Config.netherTransfer, Config.netherCapacity));
         }
 
         @Nonnull
@@ -45,27 +50,33 @@ public abstract class TileFluxStorage extends sonar.fluxnetworks.common.device.T
         }
     }
 
-    private static class EnderHandler extends FluxStorageHandler {
+    private static class ConfigStorageHandler extends FluxStorageHandler {
+        private final long capacity;
 
-        EnderHandler() {
-            super(Config.enderTransfer);
+        ConfigStorageHandler(long transfer, long capacity) {
+            super(transfer);
+            this.capacity = capacity;
         }
 
         @Override
         public long getMaxEnergyStorage() {
-            return Config.enderCapacity;
+            return capacity;
         }
     }
 
-    private static class NetherHandler extends FluxStorageHandler {
+    public record StorageConsumeResult(long capacity, long energy) {}
 
-        NetherHandler() {
-            super(Config.netherTransfer);
-        }
-
-        @Override
-        public long getMaxEnergyStorage() {
-            return Config.netherCapacity;
-        }
+    @Nullable
+    public static StorageConsumeResult tryConsumeStorageItem(ItemStackHandler inventory, int slot) {
+        ItemStack stack = inventory.getStackInSlot(slot);
+        if (stack.isEmpty()) return null;
+        Block block = Block.byItem(stack.getItem());
+        if (!(block instanceof FluxStorageBlock storageBlock)) return null;
+        long cap = storageBlock.getEnergyCapacity();
+        Long stored = stack.get(FluxDataComponents.STORED_ENERGY);
+        long energy = stored != null ? stored : 0;
+        int count = stack.getCount();
+        inventory.setStackInSlot(slot, ItemStack.EMPTY);
+        return new StorageConsumeResult(cap * count, energy * count);
     }
 }

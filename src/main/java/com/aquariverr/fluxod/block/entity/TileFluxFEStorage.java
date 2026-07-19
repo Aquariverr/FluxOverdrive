@@ -20,7 +20,6 @@ import sonar.fluxnetworks.api.FluxDataComponents;
 import sonar.fluxnetworks.api.device.FluxDeviceType;
 import sonar.fluxnetworks.api.device.IFluxPoint;
 import sonar.fluxnetworks.api.energy.IFNEnergyStorage;
-import sonar.fluxnetworks.common.block.FluxStorageBlock;
 import sonar.fluxnetworks.common.device.TileFluxConnector;
 import sonar.fluxnetworks.common.item.FluxStorageItem;
 
@@ -114,7 +113,7 @@ public class TileFluxFEStorage extends TileFluxConnector implements IFluxPoint {
     }
 
     @Override
-    protected void collectImplicitComponents(DataComponentMap.Builder builder) {
+    protected void collectImplicitComponents(@Nonnull DataComponentMap.Builder builder) {
         super.collectImplicitComponents(builder);
         builder.set(FluxDataComponents.STORED_ENERGY, mHandler.getFEBuffer());
         builder.set(FluxOdDataComponents.TOTAL_CAPACITY, mHandler.getFECapacity());
@@ -124,13 +123,13 @@ public class TileFluxFEStorage extends TileFluxConnector implements IFluxPoint {
     protected void applyImplicitComponents(BlockEntity.@NotNull DataComponentInput input) {
         super.applyImplicitComponents(input);
         mHandler.clearNetworkBuffer();
-        Long energy = input.get(FluxDataComponents.STORED_ENERGY);
-        if (energy != null && energy > 0) {
-            mHandler.setFEBuffer(energy);
-        }
         Long capacity = input.get(FluxOdDataComponents.TOTAL_CAPACITY);
         if (capacity != null && capacity > 0) {
             mHandler.setFECapacity(capacity);
+        }
+        Long energy = input.get(FluxDataComponents.STORED_ENERGY);
+        if (energy != null && energy > 0) {
+            mHandler.setFEBuffer(energy);
         }
     }
 
@@ -147,11 +146,11 @@ public class TileFluxFEStorage extends TileFluxConnector implements IFluxPoint {
     @Override
     public void readCustomTag(@Nonnull CompoundTag tag, byte type) {
         super.readCustomTag(tag, type);
-        if (tag.contains("FEBuffer")) {
-            mHandler.setFEBuffer(tag.getLong("FEBuffer"));
-        }
         if (tag.contains("FECapacity")) {
             mHandler.setFECapacity(tag.getLong("FECapacity"));
+        }
+        if (tag.contains("FEBuffer")) {
+            mHandler.setFEBuffer(tag.getLong("FEBuffer"));
         }
         if (type != FluxConstants.NBT_TILE_SETTINGS && type != FluxConstants.NBT_TILE_UPDATE && tag.contains("Inventory")) {
             if (level != null) {
@@ -167,21 +166,14 @@ public class TileFluxFEStorage extends TileFluxConnector implements IFluxPoint {
     }
 
     private void consumeItem(int slot) {
-        ItemStack stack = inventory.getStackInSlot(slot);
-        if (stack.isEmpty()) return;
-        Block block = Block.byItem(stack.getItem());
-        if (!(block instanceof FluxStorageBlock storageBlock)) return;
-        long capacity = storageBlock.getEnergyCapacity();
-        Long stored = stack.get(FluxDataComponents.STORED_ENERGY);
-        long energy = stored != null ? stored : 0;
-        int count = stack.getCount();
+        TileFluxStorage.StorageConsumeResult result = TileFluxStorage.tryConsumeStorageItem(inventory, slot);
+        if (result == null) return;
 
-        long newCapacity = mHandler.getFECapacity() + capacity * count;
+        long newCapacity = mHandler.getFECapacity() + result.capacity();
         mHandler.setFECapacity(newCapacity);
-        if (energy > 0) {
-            mHandler.setFEBuffer(mHandler.getFEBuffer() + energy * count);
+        if (result.energy() > 0) {
+            mHandler.setFEBuffer(mHandler.getFEBuffer() + result.energy());
         }
-        inventory.setStackInSlot(slot, ItemStack.EMPTY);
 
         if (level != null && !level.isClientSide) {
             level.sendBlockUpdated(worldPosition, getBlockState(), getBlockState(), Block.UPDATE_ALL);
@@ -193,12 +185,12 @@ public class TileFluxFEStorage extends TileFluxConnector implements IFluxPoint {
 
         @Override
         public int receiveEnergy(int maxReceive, boolean simulate) {
-            return (int) receiveEnergyL(maxReceive, simulate);
+            return (int) Math.min(receiveEnergyL(maxReceive, simulate), Integer.MAX_VALUE);
         }
 
         @Override
         public int extractEnergy(int maxExtract, boolean simulate) {
-            return (int) extractEnergyL(maxExtract, simulate);
+            return (int) Math.min(extractEnergyL(maxExtract, simulate), Integer.MAX_VALUE);
         }
 
         @Override

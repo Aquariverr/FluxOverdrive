@@ -36,7 +36,6 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.annotation.ParametersAreNonnullByDefault;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
 @ParametersAreNonnullByDefault
@@ -108,7 +107,7 @@ public class TileFluxLinkCrystal extends TileFluxConnector implements IFluxPoint
     }
 
     public void removeLink(BlockPos targetPos) {
-        linkedTargets.removeIf(d -> d.pos.pos().equals(targetPos));
+        linkedTargets.removeIf(d -> d.pos().pos().equals(targetPos));
         if (level != null && !level.isClientSide) {
             setChanged();
             level.sendBlockUpdated(worldPosition, getBlockState(), getBlockState(), 3);
@@ -117,7 +116,7 @@ public class TileFluxLinkCrystal extends TileFluxConnector implements IFluxPoint
 
     public boolean isLinked(BlockPos targetPos) {
         for (LinkTarget d : linkedTargets) {
-            if (d.pos.pos().equals(targetPos)) return true;
+            if (d.pos().pos().equals(targetPos)) return true;
         }
         return false;
     }
@@ -170,9 +169,9 @@ public class TileFluxLinkCrystal extends TileFluxConnector implements IFluxPoint
 
     private CompoundTag writeLinkToTag(LinkTarget d) {
         CompoundTag tag = new CompoundTag();
-        tag.put("pos", NbtUtils.writeBlockPos(d.pos.pos()));
-        tag.putString("dimension", d.pos.dimension().location().toString());
-        tag.putString("side", d.side.getName());
+        tag.put("pos", NbtUtils.writeBlockPos(d.pos().pos()));
+        tag.putString("dimension", d.pos().dimension().location().toString());
+        tag.putString("side", d.side().getName());
         return tag;
     }
 
@@ -199,15 +198,7 @@ public class TileFluxLinkCrystal extends TileFluxConnector implements IFluxPoint
         return new LinkTarget(GlobalPos.of(dim, pos), side);
     }
 
-    public static class LinkTarget {
-        public final GlobalPos pos;
-        public final Direction side;
-
-        public LinkTarget(GlobalPos pos, Direction side) {
-            this.pos = pos;
-            this.side = side;
-        }
-
+    public record LinkTarget(GlobalPos pos, Direction side) {
         @Nullable
         public BlockEntity getTarget(Level level) {
             if (level instanceof ServerLevel && pos.dimension() == level.dimension()) {
@@ -255,19 +246,19 @@ public class TileFluxLinkCrystal extends TileFluxConnector implements IFluxPoint
 
         private long sendToWirelessTargets(long energy, boolean simulate) {
             long leftover = energy;
-            Iterator<LinkTarget> it = linkedTargets.iterator();
-            while (it.hasNext()) {
-                LinkTarget device = it.next();
+            for (LinkTarget device : linkedTargets) {
                 if (leftover <= 0) return energy;
-                if (device.pos == null || device.pos.dimension() != level.dimension()) continue;
+                GlobalPos pos = device.pos();
+                if (pos == null) continue;
+                if (level == null || pos.dimension() != level.dimension()) continue;
 
                 BlockEntity target = device.getTarget(level);
                 if (target == null) continue;
 
-                IBlockEnergyConnector connector = EnergyUtils.getConnector(target, device.side);
-                if (connector == null || !connector.canSendTo(target, device.side)) continue;
+                IBlockEnergyConnector connector = EnergyUtils.getConnector(target, device.side());
+                if (connector == null || !connector.canSendTo(target, device.side())) continue;
 
-                long sent = connector.sendTo(leftover, target, device.side, simulate);
+                long sent = connector.sendTo(leftover, target, device.side(), simulate);
                 leftover -= sent;
             }
             return energy - leftover;

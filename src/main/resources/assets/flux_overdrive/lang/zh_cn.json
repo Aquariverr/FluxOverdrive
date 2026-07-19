@@ -16,7 +16,8 @@
   "tooltip.flux_overdrive.flux_fe_storage": "内置FE缓存的通量接入器，FE缓存与通量网络缓存独立",
   "tooltip.flux_overdrive.flux_fe_storage.capacity": "可通过自动化方式输入通量存储单元来增加容量",
   "tooltip.flux_overdrive.flux_link_tool.bound": "已绑定: %1$s (%2$s)",
-  "tooltip.flux_overdrive.flux_link_tool.unbound": "潜行右键通量链接水晶来绑定",
+  "tooltip.flux_overdrive.flux_link_tool.desc": "潜行右键绑定水晶\n右键绑定方块\n潜行右键空气取消水晶绑定",
+  "tooltip.flux_overdrive.flux_link_tool.unbound": "未绑定水晶",
 
   "tooltip.flux_overdrive.flux_link_crystal": "无线能量点：使用通量链接工具绑定机器",
 
@@ -35,5 +36,13 @@
   "flux_overdrive.configuration.netherCapacity": "下界通量存储器 - 能量容量 (FE)",
   "flux_overdrive.configuration.netherTransfer": "下界通量存储器 - 传输限制 (FE/t)",
   "flux_overdrive.configuration.feStorageCapacity": "通量FE存储器 - 默认能量容量 (FE)",
-  "flux_overdrive.configuration.feStorageTransfer": "通量FE存储器 - 默认传输限制 (FE/t)"
+  "flux_overdrive.configuration.feStorageTransfer": "通量FE存储器 - 默认传输限制 (FE/t)",
+
+  "jade.flux_overdrive.links": "链接数",
+
+  "config.jade.plugin_flux_overdrive.flux_device": "通量设备信息",
+  "config.jade.plugin_flux_overdrive.flux_overdrive_storage": "通量存储器信息",
+  "config.jade.plugin_flux_overdrive.flux_fe_storage": "通量FE存储器信息",
+  "config.jade.plugin_flux_overdrive.remove_builtin": "移除内置信息",
+  "config.jade.plugin_flux_overdrive.flux_link_crystal": "通量链接水晶信息"
 }

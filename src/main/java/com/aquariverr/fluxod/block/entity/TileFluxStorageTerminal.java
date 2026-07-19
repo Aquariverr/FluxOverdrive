@@ -12,8 +12,6 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.neoforged.neoforge.items.ItemStackHandler;
 import org.jetbrains.annotations.NotNull;
 import sonar.fluxnetworks.api.FluxConstants;
-import sonar.fluxnetworks.api.FluxDataComponents;
-import sonar.fluxnetworks.common.block.FluxStorageBlock;
 import sonar.fluxnetworks.common.device.FluxStorageHandler;
 import sonar.fluxnetworks.common.item.FluxStorageItem;
 
@@ -42,11 +40,6 @@ public class TileFluxStorageTerminal extends TileFluxStorage {
     public TileFluxStorageTerminal(@Nonnull BlockPos pos, @Nonnull BlockState state) {
         super(RegistryBlockEntityTypes.FLUX_STORAGE_TERMINAL.get(), pos, state, null);
         handler.setTerminal(this);
-    }
-
-    @Override
-    public void onLoad() {
-        super.onLoad();
     }
 
     @Override
@@ -82,27 +75,22 @@ public class TileFluxStorageTerminal extends TileFluxStorage {
         return inventory;
     }
 
+    @SuppressWarnings("unused")
     public long getTotalCapacity() {
         return totalCapacity;
     }
 
+    @SuppressWarnings("unused")
     public void setTotalCapacity(long capacity) {
         totalCapacity = capacity;
     }
 
     private void consumeItem(int slot) {
-        ItemStack stack = inventory.getStackInSlot(slot);
-        if (stack.isEmpty()) return;
-        Block block = Block.byItem(stack.getItem());
-        if (!(block instanceof FluxStorageBlock storageBlock)) return;
-        long capacity = storageBlock.getEnergyCapacity();
-        Long stored = stack.get(FluxDataComponents.STORED_ENERGY);
-        long energy = stored != null ? stored : 0;
-        int count = stack.getCount();
+        StorageConsumeResult result = TileFluxStorage.tryConsumeStorageItem(inventory, slot);
+        if (result == null) return;
 
-        totalCapacity += capacity * count;
-        handler.addEnergy(energy * count);
-        inventory.setStackInSlot(slot, ItemStack.EMPTY);
+        totalCapacity += result.capacity();
+        handler.addEnergy(result.energy());
 
         if (level != null && !level.isClientSide) {
             level.sendBlockUpdated(worldPosition, getBlockState(), getBlockState(), Block.UPDATE_ALL);

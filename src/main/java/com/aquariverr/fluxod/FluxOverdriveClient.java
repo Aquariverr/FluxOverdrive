@@ -1,5 +1,6 @@
 package com.aquariverr.fluxod;
 
+import com.aquariverr.fluxod.client.render.FluxFEStorageEntityRenderer;
 import com.aquariverr.fluxod.register.RegistryBlockEntityTypes;
 import com.aquariverr.fluxod.register.RegistryBlocks;
 import net.neoforged.api.distmarker.Dist;
@@ -35,5 +36,6 @@ public class FluxOverdriveClient {
         event.registerBlockEntityRenderer(RegistryBlockEntityTypes.ENDER_FLUX_STORAGE.get(), FluxStorageEntityRenderer.PROVIDER);
         event.registerBlockEntityRenderer(RegistryBlockEntityTypes.NETHER_FLUX_STORAGE.get(), FluxStorageEntityRenderer.PROVIDER);
         event.registerBlockEntityRenderer(RegistryBlockEntityTypes.FLUX_STORAGE_TERMINAL.get(), FluxStorageEntityRenderer.PROVIDER);
+        event.registerBlockEntityRenderer(RegistryBlockEntityTypes.FLUX_FE_STORAGE.get(), FluxFEStorageEntityRenderer.PROVIDER);
     }
 }

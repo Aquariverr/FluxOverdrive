@@ -65,7 +65,7 @@ public class FluxOverdriveClientEvents {
         if (crystalEntity instanceof TileFluxLinkCrystal crystal) {
             List<TileFluxLinkCrystal.LinkTarget> targets = crystal.getLinkedTargets();
             for (TileFluxLinkCrystal.LinkTarget target : targets) {
-                if (target.pos.dimension() == level.dimension()) {
+                if (target.pos().dimension() == level.dimension()) {
                     renderLinkTargetHighlight(poseStack, source, target);
                 }
             }
@@ -86,8 +86,8 @@ public class FluxOverdriveClientEvents {
     }
 
     private static void renderLinkTargetHighlight(PoseStack poseStack, MultiBufferSource source, TileFluxLinkCrystal.LinkTarget target) {
-        BlockPos pos = target.pos.pos();
-        Direction side = target.side;
+        BlockPos pos = target.pos().pos();
+        Direction side = target.side();
 
         float r = 0.3f;
         float g = 0.5f;
