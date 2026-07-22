@@ -21,13 +21,11 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.neoforged.neoforge.capabilities.BlockCapability;
-import net.neoforged.neoforge.energy.IEnergyStorage;
 import org.jetbrains.annotations.NotNull;
 import sonar.fluxnetworks.api.FluxConstants;
 import sonar.fluxnetworks.api.device.FluxDeviceType;
 import sonar.fluxnetworks.api.device.IFluxPoint;
 import sonar.fluxnetworks.api.energy.IBlockEnergyConnector;
-import sonar.fluxnetworks.api.energy.IFNEnergyStorage;
 import sonar.fluxnetworks.common.device.FluxConnectorHandler;
 import sonar.fluxnetworks.common.device.TileFluxConnector;
 import sonar.fluxnetworks.common.util.EnergyUtils;
@@ -43,9 +41,6 @@ public class TileFluxLinkCrystal extends TileFluxConnector implements IFluxPoint
 
     private final WirelessPointHandler mHandler = new WirelessPointHandler();
     private final List<LinkTarget> linkedTargets = new ArrayList<>();
-
-    @Nullable
-    private EnergyStorage mEnergyCap;
 
     public TileFluxLinkCrystal(BlockPos pos, BlockState state) {
         super(RegistryBlockEntityTypes.FLUX_LINK_CRYSTAL.get(), pos, state);
@@ -67,22 +62,8 @@ public class TileFluxLinkCrystal extends TileFluxConnector implements IFluxPoint
 
     @Nullable
     @Override
-    @SuppressWarnings("unchecked")
     public <T> T getEnergyCapability(BlockCapability<T, Direction> cap, @Nullable Direction side) {
-        if (!isRemoved()) {
-            if (mEnergyCap == null) {
-                mEnergyCap = new EnergyStorage();
-            }
-            return (T) mEnergyCap;
-        }
         return null;
-    }
-
-    @Override
-    @SuppressWarnings("NonExtendableApiUsage")
-    public void invalidateCapabilities() {
-        mEnergyCap = null;
-        super.invalidateCapabilities();
     }
 
     @Nonnull
@@ -94,6 +75,10 @@ public class TileFluxLinkCrystal extends TileFluxConnector implements IFluxPoint
     @Override
     protected void onFirstTick() {
         connect(sonar.fluxnetworks.common.connection.FluxNetworkData.getNetwork(getNetworkID()));
+    }
+
+    @Override
+    public void updateSideTransfer(@Nonnull Direction dir, @javax.annotation.Nullable BlockEntity neighbor) {
     }
 
     public void addLink(BlockPos targetPos, Direction side) {
@@ -262,59 +247,6 @@ public class TileFluxLinkCrystal extends TileFluxConnector implements IFluxPoint
                 leftover -= sent;
             }
             return energy - leftover;
-        }
-    }
-
-    private class EnergyStorage implements IEnergyStorage, IFNEnergyStorage {
-
-        @Override
-        public int receiveEnergy(int maxReceive, boolean simulate) {
-            return 0;
-        }
-
-        @Override
-        public int extractEnergy(int maxExtract, boolean simulate) {
-            return 0;
-        }
-
-        @Override
-        public int getEnergyStored() {
-            return (int) Math.min(getEnergyStoredL(), Integer.MAX_VALUE);
-        }
-
-        @Override
-        public int getMaxEnergyStored() {
-            return (int) Math.min(getMaxEnergyStoredL(), Integer.MAX_VALUE);
-        }
-
-        @Override
-        public boolean canExtract() {
-            return false;
-        }
-
-        @Override
-        public boolean canReceive() {
-            return false;
-        }
-
-        @Override
-        public long receiveEnergyL(long maxReceive, boolean simulate) {
-            return 0;
-        }
-
-        @Override
-        public long extractEnergyL(long maxExtract, boolean simulate) {
-            return 0;
-        }
-
-        @Override
-        public long getEnergyStoredL() {
-            return mHandler.getBuffer();
-        }
-
-        @Override
-        public long getMaxEnergyStoredL() {
-            return Math.max(mHandler.getBuffer(), mHandler.getLimit());
         }
     }
 }

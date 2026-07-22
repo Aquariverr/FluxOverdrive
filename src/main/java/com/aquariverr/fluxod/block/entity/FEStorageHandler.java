@@ -57,7 +57,7 @@ public class FEStorageHandler extends FluxConnectorHandler {
     @Override
     public void onCycleEnd() {
         long space = mFECapacity - mFEBuffer;
-        long toStore = Math.min(mBuffer, space);
+        long toStore = Math.min(Math.min(mBuffer, getLimit()), space);
         mFEBuffer += toStore;
         mBuffer -= toStore;
 
@@ -76,7 +76,7 @@ public class FEStorageHandler extends FluxConnectorHandler {
     public long getRequest() {
         long remaining = mFECapacity - mFEBuffer;
         long desiredGap = Math.max(mDesired - mFEBuffer, 0);
-        return Math.max(0, remaining - mBuffer + desiredGap);
+        return Math.min(getLimit(), Math.max(0, remaining - mBuffer + desiredGap));
     }
 
     @Override
