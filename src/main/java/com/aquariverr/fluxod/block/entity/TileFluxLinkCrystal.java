@@ -78,7 +78,7 @@ public class TileFluxLinkCrystal extends TileFluxConnector implements IFluxPoint
     }
 
     @Override
-    public void updateSideTransfer(@Nonnull Direction dir, @javax.annotation.Nullable BlockEntity neighbor) {
+    public void updateSideTransfer(Direction dir, @javax.annotation.Nullable BlockEntity neighbor) {
     }
 
     public void addLink(BlockPos targetPos, Direction side) {
