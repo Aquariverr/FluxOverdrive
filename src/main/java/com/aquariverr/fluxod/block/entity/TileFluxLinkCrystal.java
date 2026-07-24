@@ -40,6 +40,8 @@ import java.util.Set;
 @ParametersAreNonnullByDefault
 public class TileFluxLinkCrystal extends TileFluxConnector implements IFluxPoint {
 
+    private static final String WIRELESS_LINKS_TAG = "wirelessLinks";
+
     private final WirelessPointHandler mHandler = new WirelessPointHandler();
     protected final List<LinkTarget> linkedTargets = new ArrayList<>();
     private final List<LinkTarget> linkedTargetsView = Collections.unmodifiableList(linkedTargets);
@@ -88,8 +90,9 @@ public class TileFluxLinkCrystal extends TileFluxConnector implements IFluxPoint
     }
 
     public boolean addLink(BlockPos targetPos, Direction side) {
-        if (!canModifyLinks()) return false;
-        LinkTarget target = new LinkTarget(GlobalPos.of(level.dimension(), targetPos), side);
+        ServerLevel serverLevel = getLinkLevel();
+        if (serverLevel == null) return false;
+        LinkTarget target = new LinkTarget(GlobalPos.of(serverLevel.dimension(), targetPos), side);
         int index = findManualLink(target.pos());
         if (index < 0 && getLinkedTargets().size() >= getMaxLinks()) return false;
         if (index >= 0 && linkedTargets.get(index).equals(target)) return false;
@@ -104,8 +107,9 @@ public class TileFluxLinkCrystal extends TileFluxConnector implements IFluxPoint
     }
 
     public boolean removeLink(BlockPos targetPos) {
-        if (!canModifyLinks()) return false;
-        boolean changed = removeManualLink(GlobalPos.of(level.dimension(), targetPos));
+        ServerLevel serverLevel = getLinkLevel();
+        if (serverLevel == null) return false;
+        boolean changed = removeManualLink(GlobalPos.of(serverLevel.dimension(), targetPos));
         if (changed) linksChanged();
         return changed;
     }
@@ -114,6 +118,7 @@ public class TileFluxLinkCrystal extends TileFluxConnector implements IFluxPoint
         return level != null && findManualLink(GlobalPos.of(level.dimension(), targetPos)) >= 0;
     }
 
+    @SuppressWarnings("BooleanMethodIsAlwaysInverted")
     public boolean isInRange(BlockPos targetPos) {
         return true;
     }
@@ -134,8 +139,9 @@ public class TileFluxLinkCrystal extends TileFluxConnector implements IFluxPoint
         return (int) Config.maxCrystalLinks;
     }
 
-    protected boolean canModifyLinks() {
-        return level != null && !level.isClientSide;
+    @Nullable
+    protected ServerLevel getLinkLevel() {
+        return level instanceof ServerLevel serverLevel ? serverLevel : null;
     }
 
     protected int findManualLink(GlobalPos targetPos) {
@@ -150,9 +156,10 @@ public class TileFluxLinkCrystal extends TileFluxConnector implements IFluxPoint
     }
 
     protected void linksChanged() {
-        if (!canModifyLinks()) return;
+        ServerLevel serverLevel = getLinkLevel();
+        if (serverLevel == null) return;
         setChanged();
-        level.sendBlockUpdated(worldPosition, getBlockState(), getBlockState(), Block.UPDATE_CLIENTS);
+        serverLevel.sendBlockUpdated(worldPosition, getBlockState(), getBlockState(), Block.UPDATE_CLIENTS);
     }
 
     @Override
@@ -163,7 +170,7 @@ public class TileFluxLinkCrystal extends TileFluxConnector implements IFluxPoint
         for (LinkTarget d : linkedTargets) {
             links.add(writeLinkToTag(d));
         }
-        tag.put("wirelessLinks", links);
+        tag.put(WIRELESS_LINKS_TAG, links);
     }
 
     @Override
@@ -171,7 +178,7 @@ public class TileFluxLinkCrystal extends TileFluxConnector implements IFluxPoint
         super.readCustomTag(tag, type);
         if (type == FluxConstants.NBT_TILE_SETTINGS) return;
         linkedTargets.clear();
-        readLinksFromList(tag, "wirelessLinks");
+        readLinksFromList(tag);
     }
 
     protected static CompoundTag writeLinkToTag(LinkTarget d) {
@@ -182,11 +189,11 @@ public class TileFluxLinkCrystal extends TileFluxConnector implements IFluxPoint
         return tag;
     }
 
-    protected void readLinksFromList(CompoundTag root, String key) {
-        if (!root.contains(key)) return;
+    protected void readLinksFromList(CompoundTag root) {
+        if (!root.contains(WIRELESS_LINKS_TAG)) return;
         linkedTargets.clear();
         Set<GlobalPos> seen = new HashSet<>();
-        ListTag links = root.getList(key, Tag.TAG_COMPOUND);
+        ListTag links = root.getList(WIRELESS_LINKS_TAG, Tag.TAG_COMPOUND);
         int entriesToRead = Math.min(links.size(), getMaxLinks());
         for (int i = 0; i < entriesToRead && linkedTargets.size() < getMaxLinks(); i++) {
             LinkTarget target = readLinkFromTag(links.getCompound(i));

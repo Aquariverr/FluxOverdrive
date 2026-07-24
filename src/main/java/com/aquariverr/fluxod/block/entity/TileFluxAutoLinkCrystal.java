@@ -129,8 +129,9 @@ public class TileFluxAutoLinkCrystal extends TileFluxLinkCrystal implements IFlu
 
     @Override
     public boolean removeLink(BlockPos targetPos) {
-        if (!canModifyLinks()) return false;
-        GlobalPos target = GlobalPos.of(level.dimension(), targetPos);
+        ServerLevel serverLevel = getLinkLevel();
+        if (serverLevel == null) return false;
+        GlobalPos target = GlobalPos.of(serverLevel.dimension(), targetPos);
         boolean changed = removeManualLink(target);
         changed |= autoLinkedTargets.removeIf(link -> link.pos().equals(target));
         if (changed) linksChanged();
@@ -154,8 +155,9 @@ public class TileFluxAutoLinkCrystal extends TileFluxLinkCrystal implements IFlu
 
     @Override
     public boolean addLink(BlockPos targetPos, Direction side) {
-        if (!canModifyLinks() || !isInRange(targetPos)) return false;
-        GlobalPos globalPos = GlobalPos.of(level.dimension(), targetPos);
+        ServerLevel serverLevel = getLinkLevel();
+        if (serverLevel == null || !isInRange(targetPos)) return false;
+        GlobalPos globalPos = GlobalPos.of(serverLevel.dimension(), targetPos);
         int manualIndex = findManualLink(globalPos);
         int autoIndex = findAutoLink(globalPos);
         if (manualIndex < 0 && autoIndex < 0 && getLinkedTargets().size() >= getMaxLinks()) return false;
@@ -180,7 +182,7 @@ public class TileFluxAutoLinkCrystal extends TileFluxLinkCrystal implements IFlu
         if (!(level instanceof ServerLevel serverLevel)) return;
 
         long cooldown = Config.autoLinkScanCooldown;
-        long gameTime = level.getGameTime();
+        long gameTime = serverLevel.getGameTime();
         if (cooldown > 0 && lastScanTick != Long.MIN_VALUE && gameTime >= lastScanTick
                 && gameTime - lastScanTick < cooldown) {
             return;
@@ -198,7 +200,7 @@ public class TileFluxAutoLinkCrystal extends TileFluxLinkCrystal implements IFlu
             if (updated.size() >= autoLimit) break;
             GlobalPos globalPos = existing.pos();
             BlockPos pos = globalPos.pos();
-            if (!globalPos.dimension().equals(level.dimension()) || !isInRange(pos)
+            if (!globalPos.dimension().equals(serverLevel.dimension()) || !isInRange(pos)
                     || manualPositions.contains(globalPos)) {
                 continue;
             }
@@ -207,7 +209,7 @@ public class TileFluxAutoLinkCrystal extends TileFluxLinkCrystal implements IFlu
             if (discoveredSide != null) {
                 updated.add(new LinkTarget(globalPos, discoveredSide));
                 retainedPositions.add(pos);
-            } else if (!level.isLoaded(pos)) {
+            } else if (!serverLevel.isLoaded(pos)) {
                 updated.add(existing);
                 retainedPositions.add(pos);
             }
@@ -218,7 +220,7 @@ public class TileFluxAutoLinkCrystal extends TileFluxLinkCrystal implements IFlu
         for (Map.Entry<BlockPos, Direction> entry : additions) {
             if (updated.size() >= autoLimit) break;
             BlockPos pos = entry.getKey();
-            GlobalPos globalPos = GlobalPos.of(level.dimension(), pos);
+            GlobalPos globalPos = GlobalPos.of(serverLevel.dimension(), pos);
             if (manualPositions.contains(globalPos) || !retainedPositions.add(pos)) continue;
             updated.add(new LinkTarget(globalPos, entry.getValue()));
         }
@@ -231,14 +233,15 @@ public class TileFluxAutoLinkCrystal extends TileFluxLinkCrystal implements IFlu
     }
 
     public void tryLinkNearbyBlock(BlockPos placedPos) {
-        if (!canModifyLinks() || placedPos.equals(worldPosition) || !isInRange(placedPos)
-                || !level.isLoaded(placedPos) || getLinkedTargets().size() >= getMaxLinks()) {
+        ServerLevel serverLevel = getLinkLevel();
+        if (serverLevel == null || placedPos.equals(worldPosition) || !isInRange(placedPos)
+                || !serverLevel.isLoaded(placedPos) || getLinkedTargets().size() >= getMaxLinks()) {
             return;
         }
 
-        Direction side = findValidEnergySide(level, placedPos);
+        Direction side = findValidEnergySide(serverLevel, placedPos);
         if (side == null) return;
-        GlobalPos globalPos = GlobalPos.of(level.dimension(), placedPos);
+        GlobalPos globalPos = GlobalPos.of(serverLevel.dimension(), placedPos);
         if (findManualLink(globalPos) >= 0 || findAutoLink(globalPos) >= 0) return;
 
         autoLinkedTargets.add(new LinkTarget(globalPos, side));
@@ -261,9 +264,9 @@ public class TileFluxAutoLinkCrystal extends TileFluxLinkCrystal implements IFlu
                     BlockPos pos = blockEntity.getBlockPos();
                     if (pos.equals(worldPosition) || !isInRange(pos)) continue;
 
-                    Direction side = findValidEnergySide(level, pos);
+                    Direction side = findValidEnergySide(serverLevel, pos);
                     if (side == null) {
-                        int existingIndex = findAutoLink(GlobalPos.of(level.dimension(), pos));
+                        int existingIndex = findAutoLink(GlobalPos.of(serverLevel.dimension(), pos));
                         if (existingIndex >= 0) {
                             LinkTarget existing = autoLinkedTargets.get(existingIndex);
                             if (hasEnergyCapability(blockEntity, existing.side())) {

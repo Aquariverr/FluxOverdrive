@@ -115,7 +115,7 @@ public class FEStorageHandler extends FluxConnectorHandler {
     }
 
     @Override
-    public void writePacketBuffer(FriendlyByteBuf buffer, byte type) {
+    public void writePacketBuffer(@Nonnull FriendlyByteBuf buffer, byte type) {
         if (type == BUFFER_UPDATE_PACKET) {
             buffer.writeLong(mFEBuffer);
         } else {
@@ -124,7 +124,7 @@ public class FEStorageHandler extends FluxConnectorHandler {
     }
 
     @Override
-    public void readPacketBuffer(FriendlyByteBuf buffer, byte type) {
+    public void readPacketBuffer(@Nonnull FriendlyByteBuf buffer, byte type) {
         if (type == BUFFER_UPDATE_PACKET) {
             setFEBuffer(buffer.readLong());
         } else {

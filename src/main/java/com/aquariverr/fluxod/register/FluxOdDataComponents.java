@@ -19,13 +19,11 @@ public class FluxOdDataComponents {
             .networkSynchronized(ByteBufCodecs.VAR_LONG)
             .build();
 
-    @SuppressWarnings("deprecation")
     public static final DataComponentType<GlobalPos> FLUX_LINK_BINDER = DataComponentType.<GlobalPos>builder()
             .persistent(GlobalPos.CODEC)
             .networkSynchronized(GlobalPos.STREAM_CODEC)
             .build();
 
-    @SuppressWarnings("deprecation")
     public static final DataComponentType<CustomData> LINK_TARGETS = DataComponentType.<CustomData>builder()
             .persistent(CustomData.CODEC)
             .build();

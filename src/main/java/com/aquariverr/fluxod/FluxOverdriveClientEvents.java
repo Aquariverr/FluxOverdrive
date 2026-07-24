@@ -53,7 +53,6 @@ public class FluxOverdriveClientEvents {
         if (!boundPos.dimension().equals(level.dimension())) return;
 
         PoseStack poseStack = event.getPoseStack();
-        if (poseStack == null) return;
         Camera camera = mc.gameRenderer.getMainCamera();
         Vec3 camPos = camera.getPosition();
         MultiBufferSource.BufferSource source = mc.renderBuffers().bufferSource();

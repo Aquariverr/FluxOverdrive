@@ -56,9 +56,8 @@ public class FluxLinkToolItem extends Item {
             return InteractionResult.SUCCESS;
         }
 
-        if (isBound(stack)) {
-            GlobalPos boundPos = getBound(stack);
-            if (boundPos == null) return InteractionResult.PASS;
+        GlobalPos boundPos = getBound(stack);
+        if (boundPos != null) {
             if (level.isClientSide) return InteractionResult.SUCCESS;
             if (!boundPos.dimension().equals(level.dimension())) {
                 player.displayClientMessage(
@@ -77,7 +76,7 @@ public class FluxLinkToolItem extends Item {
                     return InteractionResult.FAIL;
                 }
                 if (crystal.isLinked(clickedPos)) {
-                    crystal.removeLink(clickedPos);
+                    if (!crystal.removeLink(clickedPos)) return InteractionResult.FAIL;
                     player.displayClientMessage(
                             Component.translatable("message.flux_overdrive.link_removed").withStyle(ChatFormatting.YELLOW),
                             true);
@@ -120,8 +119,8 @@ public class FluxLinkToolItem extends Item {
         for (String line : desc.split("\n")) {
             tooltip.add(Component.literal(line).withStyle(ChatFormatting.GRAY));
         }
-        if (isBound(stack)) {
-            GlobalPos pos = getBound(stack);
+        GlobalPos pos = getBound(stack);
+        if (pos != null) {
             tooltip.add(Component.translatable("tooltip.flux_overdrive.flux_link_tool.bound",
                     pos.pos().toShortString(),
                     pos.dimension().location().toString()
