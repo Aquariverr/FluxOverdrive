@@ -1,15 +1,18 @@
 package com.aquariverr.fluxod.integration.jade;
 
 import com.aquariverr.fluxod.FluxOverdrive;
+import com.aquariverr.fluxod.block.FluxAutoLinkCrystalBlock;
 import com.aquariverr.fluxod.block.FluxFEStorageBlock;
 import com.aquariverr.fluxod.block.FluxLinkCrystalBlock;
 import com.aquariverr.fluxod.block.FluxStorageTerminalBlock;
+import com.aquariverr.fluxod.block.entity.TileFluxAutoLinkCrystal;
 import com.aquariverr.fluxod.block.entity.TileFluxFEStorage;
 import com.aquariverr.fluxod.block.entity.TileFluxLinkCrystal;
 
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
@@ -19,6 +22,8 @@ import snownee.jade.api.*;
 import snownee.jade.api.config.IPluginConfig;
 import snownee.jade.api.ui.Element;
 import snownee.jade.api.ui.IElementHelper;
+
+import javax.annotation.Nullable;
 import sonar.fluxnetworks.api.FluxTranslate;
 import sonar.fluxnetworks.api.device.FluxDeviceType;
 import sonar.fluxnetworks.api.energy.EnergyType;
@@ -36,11 +41,17 @@ import sonar.fluxnetworks.common.util.FluxUtils;
 public class JadePlugin implements IWailaPlugin {
 
     @Override
+    public void register(IWailaCommonRegistration registration) {
+        registration.registerBlockDataProvider(FluxDeviceServerProvider.INSTANCE, TileFluxDevice.class);
+    }
+
+    @Override
     public void registerClient(IWailaClientRegistration registration) {
         registerFnBlocks(registration, BuiltinRemover.INSTANCE);
         registerFnBlocks(registration, FluxDeviceProvider.INSTANCE);
         registration.registerBlockComponent(BuiltinRemover.INSTANCE, FluxFEStorageBlock.class);
         registration.registerBlockComponent(BuiltinRemover.INSTANCE, FluxLinkCrystalBlock.class);
+        registration.registerBlockComponent(BuiltinRemover.INSTANCE, FluxAutoLinkCrystalBlock.class);
         registration.registerBlockComponent(BuiltinRemover.INSTANCE,
                 com.aquariverr.fluxod.block.FluxStorageBlock.Ender.class);
         registration.registerBlockComponent(BuiltinRemover.INSTANCE,
@@ -49,6 +60,7 @@ public class JadePlugin implements IWailaPlugin {
 
         registration.registerBlockComponent(FluxFEStorageProvider.INSTANCE, FluxFEStorageBlock.class);
         registration.registerBlockComponent(FluxLinkCrystalProvider.INSTANCE, FluxLinkCrystalBlock.class);
+        registration.registerBlockComponent(FluxLinkCrystalProvider.INSTANCE, FluxAutoLinkCrystalBlock.class);
         registration.registerBlockComponent(FluxOverdriveStorageProvider.INSTANCE,
                 com.aquariverr.fluxod.block.FluxStorageBlock.Ender.class);
         registration.registerBlockComponent(FluxOverdriveStorageProvider.INSTANCE,
@@ -93,7 +105,7 @@ public class JadePlugin implements IWailaPlugin {
             if (!(be instanceof TileFluxDevice device)) return;
 
             addNetworkName(tooltip, device);
-            addTransferInfo(tooltip, device);
+            addTransferInfo(tooltip, device, accessor.getServerData());
             FluxDeviceType type = device.getDeviceType();
 
             if (type.isStorage()) {
@@ -130,8 +142,13 @@ public class JadePlugin implements IWailaPlugin {
             }
         }
 
-        static void addTransferInfo(ITooltip tooltip, TileFluxDevice device) {
-            String info = FluxUtils.getTransferInfo(device, EnergyType.FE);
+        static void addTransferInfo(ITooltip tooltip, TileFluxDevice device, @Nullable CompoundTag serverData) {
+            String info;
+            if (serverData != null && serverData.contains(FluxDeviceServerProvider.KEY_TRANSFER_INFO)) {
+                info = serverData.getString(FluxDeviceServerProvider.KEY_TRANSFER_INFO);
+            } else {
+                info = FluxUtils.getTransferInfo(device, EnergyType.FE);
+            }
             if (!info.isEmpty()) {
                 tooltip.add(IElementHelper.get().text(Component.literal(info)));
             }
@@ -204,7 +221,7 @@ public class JadePlugin implements IWailaPlugin {
             if (!(be instanceof TileFluxFEStorage storage)) return;
 
             FluxDeviceProvider.addNetworkName(tooltip, storage);
-            FluxDeviceProvider.addTransferInfo(tooltip, storage);
+            FluxDeviceProvider.addTransferInfo(tooltip, storage, accessor.getServerData());
             FluxDeviceProvider.addEnergyBarInfo(tooltip, storage, storage.getFEBuffer(), storage.getFECapacity());
         }
 
@@ -222,15 +239,39 @@ public class JadePlugin implements IWailaPlugin {
             BlockEntity be = accessor.getBlockEntity();
             if (!(be instanceof TileFluxLinkCrystal crystal)) return;
 
+            CompoundTag serverData = accessor.getServerData();
+
             IElementHelper e = IElementHelper.get();
 
             FluxDeviceProvider.addNetworkName(tooltip, crystal);
-            FluxDeviceProvider.addTransferInfo(tooltip, crystal);
+            FluxDeviceProvider.addTransferInfo(tooltip, crystal, serverData);
 
+            int linkCount;
+            if (serverData.contains(FluxDeviceServerProvider.KEY_LINK_COUNT)) {
+                linkCount = serverData.getInt(FluxDeviceServerProvider.KEY_LINK_COUNT);
+            } else {
+                linkCount = crystal.getLinkedTargets().size();
+            }
             tooltip.add(e.text(
                     Component.translatable("jade.flux_overdrive.links").append(": ")
-                            .append(Component.literal(String.valueOf(crystal.getLinkedTargets().size()))
+                            .append(Component.literal(String.valueOf(linkCount))
                                     .withStyle(ChatFormatting.GOLD))));
+
+            int autoCount = 0;
+            boolean hasAutoCount = false;
+            if (serverData.contains(FluxDeviceServerProvider.KEY_AUTO_LINK_COUNT)) {
+                autoCount = serverData.getInt(FluxDeviceServerProvider.KEY_AUTO_LINK_COUNT);
+                hasAutoCount = true;
+            } else if (be instanceof TileFluxAutoLinkCrystal autoCrystal) {
+                autoCount = autoCrystal.getAutoLinkedTargets().size();
+                hasAutoCount = true;
+            }
+            if (hasAutoCount && autoCount > 0) {
+                tooltip.add(e.text(
+                        Component.translatable("jade.flux_overdrive.auto_links").append(": ")
+                                .append(Component.literal(String.valueOf(autoCount))
+                                        .withStyle(ChatFormatting.GOLD))));
+            }
 
             TransferHandler handler = crystal.getTransferHandler();
             if (handler.getBuffer() > 0) {
@@ -263,7 +304,7 @@ public class JadePlugin implements IWailaPlugin {
             if (!(handler instanceof FluxStorageHandler sh)) return;
 
             FluxDeviceProvider.addNetworkName(tooltip, device);
-            FluxDeviceProvider.addTransferInfo(tooltip, device);
+            FluxDeviceProvider.addTransferInfo(tooltip, device, accessor.getServerData());
             FluxDeviceProvider.addEnergyBarInfo(tooltip, device, sh.getBuffer(), sh.getMaxEnergyStorage());
         }
 
@@ -308,6 +349,37 @@ public class JadePlugin implements IWailaPlugin {
             String text = EnergyType.FE.getStorageCompact(stored) + " / " + EnergyType.FE.getStorageCompact(capacity);
             gfx.drawCenteredString(Minecraft.getInstance().font, Component.literal(text).withColor(TEXT_COLOR),
                     xi + WIDTH / 2, yi + 2, TEXT_COLOR);
+        }
+    }
+
+    enum FluxDeviceServerProvider implements IServerDataProvider<BlockAccessor> {
+        INSTANCE;
+
+        static final String KEY_TRANSFER_INFO = "fod.transferInfo";
+        static final String KEY_LINK_COUNT = "fod.linkCount";
+        static final String KEY_AUTO_LINK_COUNT = "fod.autoLinkCount";
+
+        @Override
+        public void appendServerData(CompoundTag tag, BlockAccessor accessor) {
+            BlockEntity be = accessor.getBlockEntity();
+            if (!(be instanceof TileFluxDevice device)) return;
+
+            String transferInfo = FluxUtils.getTransferInfo(device, EnergyType.FE);
+            if (!transferInfo.isEmpty()) {
+                tag.putString(KEY_TRANSFER_INFO, transferInfo);
+            }
+
+            if (be instanceof TileFluxLinkCrystal crystal) {
+                tag.putInt(KEY_LINK_COUNT, crystal.getLinkedTargets().size());
+            }
+            if (be instanceof TileFluxAutoLinkCrystal autoCrystal) {
+                tag.putInt(KEY_AUTO_LINK_COUNT, autoCrystal.getAutoLinkedTargets().size());
+            }
+        }
+
+        @Override
+        public ResourceLocation getUid() {
+            return FluxOverdrive.location("flux_device_server_data");
         }
     }
 }

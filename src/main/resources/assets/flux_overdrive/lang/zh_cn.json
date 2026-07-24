@@ -11,6 +11,7 @@
   "block.flux_overdrive.flux_storage_terminal": "通量存储终端",
   "block.flux_overdrive.flux_fe_storage": "通量FE存储器",
   "block.flux_overdrive.flux_link_crystal": "通量链接水晶",
+  "block.flux_overdrive.flux_auto_link_crystal": "通量自动链接水晶",
   "item.flux_overdrive.flux_link_tool": "通量链接工具",
   "tooltip.flux_overdrive.flux_storage_terminal": "可通过自动化方式输入通量存储单元来增加容量",
   "tooltip.flux_overdrive.flux_fe_storage": "内置FE缓存的通量接入器，FE缓存与通量网络缓存独立",
@@ -20,6 +21,9 @@
   "tooltip.flux_overdrive.flux_link_tool.unbound": "未绑定水晶",
 
   "tooltip.flux_overdrive.flux_link_crystal": "无线能量点：使用通量链接工具绑定机器",
+  "tooltip.flux_overdrive.flux_auto_link_crystal.1": "自动检测附近 %s 格新放置的方块进行连接",
+  "tooltip.flux_overdrive.flux_auto_link_crystal.2": "红石脉冲触发主动扫描，连接范围内方块并消除无效连接",
+  "tooltip.flux_overdrive.flux_auto_link_crystal.3": "同样支持通量链接工具绑定",
 
   "message.flux_overdrive.crystal_bound": "已绑定水晶到此工具",
   "message.flux_overdrive.crystal_unbound": "已取消工具的水晶绑定",
@@ -27,6 +31,7 @@
   "message.flux_overdrive.wrong_dimension": "绑定的水晶在其他维度",
   "message.flux_overdrive.link_added": "方块已链接到水晶",
   "message.flux_overdrive.link_removed": "方块已从水晶断开链接",
+  "message.flux_overdrive.out_of_range": "目标超出连接范围",
 
   "flux_overdrive.configuration.title": "Flux Overdrive 设置",
   "flux_overdrive.configuration.section.flux_overdrive.server.toml": "服务器设置",
@@ -37,8 +42,11 @@
   "flux_overdrive.configuration.netherTransfer": "下界通量存储器 - 传输限制 (FE/t)",
   "flux_overdrive.configuration.feStorageCapacity": "通量FE存储器 - 默认能量容量 (FE)",
   "flux_overdrive.configuration.feStorageTransfer": "通量FE存储器 - 默认传输限制 (FE/t)",
+  "flux_overdrive.configuration.autoLinkRadius": "通量自动链接水晶 - 连接范围 (格)",
+  "flux_overdrive.configuration.autoLinkScanCooldown": "通量自动链接水晶 - 扫描冷却 (ticks)",
 
   "jade.flux_overdrive.links": "链接数",
+  "jade.flux_overdrive.auto_links": "自动链接",
 
   "config.jade.plugin_flux_overdrive.flux_device": "通量设备信息",
   "config.jade.plugin_flux_overdrive.flux_overdrive_storage": "通量存储器信息",

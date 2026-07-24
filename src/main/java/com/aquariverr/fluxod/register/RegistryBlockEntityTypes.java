@@ -6,6 +6,7 @@ import net.neoforged.neoforge.capabilities.Capabilities;
 import net.neoforged.neoforge.capabilities.RegisterCapabilitiesEvent;
 import net.neoforged.neoforge.registries.DeferredHolder;
 import net.neoforged.neoforge.registries.RegisterEvent;
+import com.aquariverr.fluxod.block.entity.TileFluxAutoLinkCrystal;
 import com.aquariverr.fluxod.block.entity.TileFluxLinkCrystal;
 import com.aquariverr.fluxod.block.entity.TileFluxFEStorage;
 import com.aquariverr.fluxod.block.entity.TileFluxStorage;
@@ -28,6 +29,8 @@ public class RegistryBlockEntityTypes {
             holder(RegistryBlocks.FLUX_FE_STORAGE_KEY);
     public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<TileFluxLinkCrystal>> FLUX_LINK_CRYSTAL =
             holder(RegistryBlocks.FLUX_LINK_CRYSTAL_KEY);
+    public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<TileFluxAutoLinkCrystal>> FLUX_AUTO_LINK_CRYSTAL =
+            holder(RegistryBlocks.FLUX_AUTO_LINK_CRYSTAL_KEY);
 
     static <T extends BlockEntity> DeferredHolder<BlockEntityType<?>, BlockEntityType<T>> holder(ResourceLocation location) {
         return DeferredHolder.create(BuiltInRegistries.BLOCK_ENTITY_TYPE.key(), location);
@@ -57,6 +60,11 @@ public class RegistryBlockEntityTypes {
         helper.register(RegistryBlocks.FLUX_LINK_CRYSTAL_KEY, new BlockEntityType<>(
                 TileFluxLinkCrystal::new,
                 Set.of(RegistryBlocks.FLUX_LINK_CRYSTAL.get()),
+                DSL.remainderType()
+        ));
+        helper.register(RegistryBlocks.FLUX_AUTO_LINK_CRYSTAL_KEY, new BlockEntityType<>(
+                TileFluxAutoLinkCrystal::new,
+                Set.of(RegistryBlocks.FLUX_AUTO_LINK_CRYSTAL.get()),
                 DSL.remainderType()
         ));
     }

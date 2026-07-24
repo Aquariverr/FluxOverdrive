@@ -21,14 +21,16 @@ public class FluxOverdriveClient {
                 RegistryBlocks.NETHER_FLUX_STORAGE.get(),
                 RegistryBlocks.FLUX_STORAGE_TERMINAL.get(),
                 RegistryBlocks.FLUX_FE_STORAGE.get(),
-                RegistryBlocks.FLUX_LINK_CRYSTAL.get());
+                RegistryBlocks.FLUX_LINK_CRYSTAL.get(),
+                RegistryBlocks.FLUX_AUTO_LINK_CRYSTAL.get());
     }
 
     @SubscribeEvent
     static void registerItemColorHandlers(RegisterColorHandlersEvent.Item event) {
         event.register(FluxColorHandler.INSTANCE,
                 RegistryBlocks.FLUX_FE_STORAGE.get(),
-                RegistryBlocks.FLUX_LINK_CRYSTAL.get());
+                RegistryBlocks.FLUX_LINK_CRYSTAL.get(),
+                RegistryBlocks.FLUX_AUTO_LINK_CRYSTAL.get());
     }
 
     @SubscribeEvent

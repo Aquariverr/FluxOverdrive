@@ -12,6 +12,8 @@ public class Config {
     public static long netherTransfer = 80_000_000L;
     public static long feStorageCapacity = 1_000_000L;
     public static long feStorageTransfer = 50_000L;
+    public static long autoLinkRadius = 16L;
+    public static long autoLinkScanCooldown = 20L;
 
     private static final ModConfigSpec.Builder BUILDER = new ModConfigSpec.Builder();
 
@@ -39,6 +41,14 @@ public class Config {
             .comment("Default transfer limit of the Flux FE Storage (FE/t)")
             .defineInRange("feStorageTransfer", 50_000L, 0, Long.MAX_VALUE);
 
+    public static final ModConfigSpec.LongValue AUTO_LINK_RADIUS = BUILDER
+            .comment("Connection range of the Flux Auto Link Crystal (blocks)")
+            .defineInRange("autoLinkRadius", 16L, 1, 64);
+
+    public static final ModConfigSpec.LongValue AUTO_LINK_SCAN_COOLDOWN = BUILDER
+            .comment("Cooldown between redstone-triggered scans (ticks)")
+            .defineInRange("autoLinkScanCooldown", 20L, 0, 200);
+
     public static final ModConfigSpec SPEC = BUILDER.build();
 
     static void onConfigEvent(@Nonnull ModConfigEvent event) {
@@ -52,6 +62,8 @@ public class Config {
             netherTransfer = NETHER_TRANSFER.get();
             feStorageCapacity = FE_STORAGE_CAPACITY.get();
             feStorageTransfer = FE_STORAGE_TRANSFER.get();
+            autoLinkRadius = AUTO_LINK_RADIUS.get();
+            autoLinkScanCooldown = AUTO_LINK_SCAN_COOLDOWN.get();
             FluxOverdrive.LOGGER.info("Flux Overdrive config loaded");
         }
     }

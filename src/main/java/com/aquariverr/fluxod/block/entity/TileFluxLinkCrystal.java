@@ -19,6 +19,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.component.CustomData;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 import net.neoforged.neoforge.capabilities.BlockCapability;
 import org.jetbrains.annotations.NotNull;
@@ -44,6 +45,12 @@ public class TileFluxLinkCrystal extends TileFluxConnector implements IFluxPoint
 
     public TileFluxLinkCrystal(BlockPos pos, BlockState state) {
         super(RegistryBlockEntityTypes.FLUX_LINK_CRYSTAL.get(), pos, state);
+        mHandler.setLimit(Config.feStorageTransfer);
+        mHandler.setCapacity(Config.feStorageCapacity);
+    }
+
+    protected TileFluxLinkCrystal(BlockEntityType<?> type, BlockPos pos, BlockState state) {
+        super(type, pos, state);
         mHandler.setLimit(Config.feStorageTransfer);
         mHandler.setCapacity(Config.feStorageCapacity);
     }
@@ -104,6 +111,10 @@ public class TileFluxLinkCrystal extends TileFluxConnector implements IFluxPoint
             if (d.pos().pos().equals(targetPos)) return true;
         }
         return false;
+    }
+
+    public boolean isInRange(BlockPos targetPos) {
+        return true;
     }
 
     public List<LinkTarget> getLinkedTargets() {

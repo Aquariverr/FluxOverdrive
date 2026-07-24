@@ -1,0 +1,22 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "group": "flux_overdrive",
+  "pattern": [
+    " d ",
+    "dcd",
+    " d "
+  ],
+  "key": {
+    "d": {
+      "item": "flux_overdrive:ender_flux_dust"
+    },
+    "c": {
+      "item": "flux_overdrive:flux_link_crystal"
+    }
+  },
+  "result": {
+    "id": "flux_overdrive:flux_auto_link_crystal",
+    "count": 1
+  }
+}

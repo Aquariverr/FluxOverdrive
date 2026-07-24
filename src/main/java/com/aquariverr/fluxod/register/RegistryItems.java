@@ -6,6 +6,7 @@ import net.minecraft.world.item.Item;
 import net.neoforged.neoforge.registries.DeferredItem;
 import net.neoforged.neoforge.registries.RegisterEvent;
 import com.aquariverr.fluxod.FluxOverdrive;
+import com.aquariverr.fluxod.item.FluxAutoLinkCrystalItem;
 import com.aquariverr.fluxod.item.FluxLinkCrystalItem;
 import com.aquariverr.fluxod.item.FluxLinkToolItem;
 import com.aquariverr.fluxod.item.FluxStorageTerminalItem;
@@ -18,6 +19,7 @@ public class RegistryItems {
     private static final ResourceLocation NETHER_FLUX_DUST_KEY = FluxOverdrive.location("nether_flux_dust");
     private static final ResourceLocation NETHER_FLUX_CORE_KEY = FluxOverdrive.location("nether_flux_core");
     private static final ResourceLocation FLUX_LINK_CRYSTAL_KEY = FluxOverdrive.location("flux_link_crystal");
+    private static final ResourceLocation FLUX_AUTO_LINK_CRYSTAL_KEY = FluxOverdrive.location("flux_auto_link_crystal");
     private static final ResourceLocation FLUX_LINK_TOOL_KEY = FluxOverdrive.location("flux_link_tool");
 
     public static final DeferredItem<BlockItem> ENDER_FLUX_BLOCK = holder(RegistryBlocks.ENDER_FLUX_BLOCK_KEY);
@@ -31,6 +33,7 @@ public class RegistryItems {
     public static final DeferredItem<Item> NETHER_FLUX_DUST = holder(NETHER_FLUX_DUST_KEY);
     public static final DeferredItem<Item> NETHER_FLUX_CORE = holder(NETHER_FLUX_CORE_KEY);
     public static final DeferredItem<FluxLinkCrystalItem> FLUX_LINK_CRYSTAL = holder(FLUX_LINK_CRYSTAL_KEY);
+    public static final DeferredItem<FluxAutoLinkCrystalItem> FLUX_AUTO_LINK_CRYSTAL = holder(FLUX_AUTO_LINK_CRYSTAL_KEY);
     public static final DeferredItem<FluxLinkToolItem> FLUX_LINK_TOOL = holder(FLUX_LINK_TOOL_KEY);
 
     static <T extends Item> DeferredItem<T> holder(ResourceLocation location) {
@@ -53,6 +56,7 @@ public class RegistryItems {
         helper.register(NETHER_FLUX_CORE_KEY, new Item(normalProps));
 
         helper.register(FLUX_LINK_CRYSTAL_KEY, new FluxLinkCrystalItem(RegistryBlocks.FLUX_LINK_CRYSTAL.get(), normalProps));
+        helper.register(FLUX_AUTO_LINK_CRYSTAL_KEY, new FluxAutoLinkCrystalItem(RegistryBlocks.FLUX_AUTO_LINK_CRYSTAL.get(), normalProps));
         helper.register(FLUX_LINK_TOOL_KEY, new FluxLinkToolItem(normalProps.stacksTo(1)));
     }
 

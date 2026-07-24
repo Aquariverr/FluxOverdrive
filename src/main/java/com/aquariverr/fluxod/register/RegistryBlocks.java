@@ -8,6 +8,7 @@ import net.minecraft.world.level.material.MapColor;
 import net.neoforged.neoforge.registries.DeferredBlock;
 import net.neoforged.neoforge.registries.RegisterEvent;
 import com.aquariverr.fluxod.FluxOverdrive;
+import com.aquariverr.fluxod.block.FluxAutoLinkCrystalBlock;
 import com.aquariverr.fluxod.block.FluxFEStorageBlock;
 import com.aquariverr.fluxod.block.FluxLinkCrystalBlock;
 import com.aquariverr.fluxod.block.FluxStorageBlock;
@@ -21,6 +22,7 @@ public class RegistryBlocks {
     public static final ResourceLocation FLUX_STORAGE_TERMINAL_KEY = FluxOverdrive.location("flux_storage_terminal");
     public static final ResourceLocation FLUX_FE_STORAGE_KEY = FluxOverdrive.location("flux_fe_storage");
     public static final ResourceLocation FLUX_LINK_CRYSTAL_KEY = FluxOverdrive.location("flux_link_crystal");
+    public static final ResourceLocation FLUX_AUTO_LINK_CRYSTAL_KEY = FluxOverdrive.location("flux_auto_link_crystal");
 
     public static final DeferredBlock<Block> ENDER_FLUX_BLOCK = holder(ENDER_FLUX_BLOCK_KEY);
     public static final DeferredBlock<Block> NETHER_FLUX_BLOCK = holder(NETHER_FLUX_BLOCK_KEY);
@@ -29,6 +31,7 @@ public class RegistryBlocks {
     public static final DeferredBlock<FluxStorageTerminalBlock> FLUX_STORAGE_TERMINAL = holder(FLUX_STORAGE_TERMINAL_KEY);
     public static final DeferredBlock<FluxFEStorageBlock> FLUX_FE_STORAGE = holder(FLUX_FE_STORAGE_KEY);
     public static final DeferredBlock<FluxLinkCrystalBlock> FLUX_LINK_CRYSTAL = holder(FLUX_LINK_CRYSTAL_KEY);
+    public static final DeferredBlock<FluxAutoLinkCrystalBlock> FLUX_AUTO_LINK_CRYSTAL = holder(FLUX_AUTO_LINK_CRYSTAL_KEY);
 
     static <T extends Block> DeferredBlock<T> holder(ResourceLocation location) {
         return DeferredBlock.createBlock(location);
@@ -53,6 +56,7 @@ public class RegistryBlocks {
         helper.register(FLUX_STORAGE_TERMINAL_KEY, new FluxStorageTerminalBlock(deviceProps));
         helper.register(FLUX_FE_STORAGE_KEY, new FluxFEStorageBlock(deviceProps));
         helper.register(FLUX_LINK_CRYSTAL_KEY, new FluxLinkCrystalBlock(deviceProps));
+        helper.register(FLUX_AUTO_LINK_CRYSTAL_KEY, new FluxAutoLinkCrystalBlock(deviceProps));
     }
 
     private RegistryBlocks() {}

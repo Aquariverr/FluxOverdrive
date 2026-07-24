@@ -32,6 +32,7 @@ public class RegistryCreativeModeTabs {
                     output.accept(RegistryItems.NETHER_FLUX_DUST.get());
                     output.accept(RegistryItems.NETHER_FLUX_CORE.get());
                     output.accept(RegistryItems.FLUX_LINK_CRYSTAL.get());
+                    output.accept(RegistryItems.FLUX_AUTO_LINK_CRYSTAL.get());
                     output.accept(RegistryItems.FLUX_LINK_TOOL.get());
                 })
                 .build());

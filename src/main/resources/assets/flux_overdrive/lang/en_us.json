@@ -11,6 +11,7 @@
   "block.flux_overdrive.flux_storage_terminal": "Flux Storage Terminal",
   "block.flux_overdrive.flux_fe_storage": "Flux FE Storage",
   "block.flux_overdrive.flux_link_crystal": "Flux Link Crystal",
+  "block.flux_overdrive.flux_auto_link_crystal": "Flux Auto Link Crystal",
   "item.flux_overdrive.flux_link_tool": "Flux Link Tool",
   "tooltip.flux_overdrive.flux_storage_terminal": "Can accept Flux Storage units via automation to increase capacity",
   "tooltip.flux_overdrive.flux_fe_storage": "FluxPoint with built-in FE buffer, separate from network buffer",
@@ -20,6 +21,9 @@
   "tooltip.flux_overdrive.flux_link_tool.unbound": "No crystal bound",
 
   "tooltip.flux_overdrive.flux_link_crystal": "Wireless energy point: use Flux Link Tool to bind machines",
+  "tooltip.flux_overdrive.flux_auto_link_crystal.1": "Auto-detects newly placed blocks within %s blocks",
+  "tooltip.flux_overdrive.flux_auto_link_crystal.2": "Redstone pulse triggers scan, connects blocks and removes invalid links",
+  "tooltip.flux_overdrive.flux_auto_link_crystal.3": "Also supports Flux Link Tool binding",
 
   "message.flux_overdrive.crystal_bound": "Crystal bound to tool",
   "message.flux_overdrive.crystal_unbound": "Crystal unbound from tool",
@@ -27,6 +31,7 @@
   "message.flux_overdrive.wrong_dimension": "Bound crystal is in another dimension",
   "message.flux_overdrive.link_added": "Block linked to crystal",
   "message.flux_overdrive.link_removed": "Block unlinked from crystal",
+  "message.flux_overdrive.out_of_range": "Target is out of range",
 
   "flux_overdrive.configuration.title": "Flux Overdrive Config",
   "flux_overdrive.configuration.section.flux_overdrive.server.toml": "Flux Overdrive Config",
@@ -37,8 +42,11 @@
   "flux_overdrive.configuration.netherTransfer": "Nether Flux Storage - Transfer Limit (FE/t)",
   "flux_overdrive.configuration.feStorageCapacity": "Flux FE Storage - Default Energy Capacity (FE)",
   "flux_overdrive.configuration.feStorageTransfer": "Flux FE Storage - Default Transfer Limit (FE/t)",
+  "flux_overdrive.configuration.autoLinkRadius": "Flux Auto Link Crystal - Connection Range (blocks)",
+  "flux_overdrive.configuration.autoLinkScanCooldown": "Flux Auto Link Crystal - Scan Cooldown (ticks)",
 
   "jade.flux_overdrive.links": "Links",
+  "jade.flux_overdrive.auto_links": "Auto Links",
 
   "config.jade.plugin_flux_overdrive.flux_device": "Flux Device Info",
   "config.jade.plugin_flux_overdrive.flux_overdrive_storage": "Flux Overdrive Storage Info",

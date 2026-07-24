@@ -73,6 +73,13 @@ public class FluxLinkToolItem extends Item {
                                 Component.translatable("message.flux_overdrive.link_removed").withStyle(ChatFormatting.YELLOW),
                                 true);
                     }
+                } else if (!crystal.isInRange(clickedPos)) {
+                    if (!level.isClientSide) {
+                        player.displayClientMessage(
+                                Component.translatable("message.flux_overdrive.out_of_range").withStyle(ChatFormatting.RED),
+                                true);
+                    }
+                    return InteractionResult.FAIL;
                 } else {
                     crystal.addLink(clickedPos, side);
                     if (!level.isClientSide) {
