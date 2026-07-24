@@ -342,9 +342,11 @@ public class JadePlugin implements IWailaPlugin {
 
             gfx.fill(xi, yi, xi + WIDTH, yi + HEIGHT, BAR_BG);
 
-            float ratio = Math.clamp((float) ((double) stored / capacity), 0f, 1f);
-            int fillWidth = Math.max(1, Mth.floor(WIDTH * ratio));
-            gfx.fill(xi, yi, xi + fillWidth, yi + HEIGHT, BAR_FILL);
+            float ratio = capacity > 0 ? Math.clamp((float) ((double) stored / capacity), 0f, 1f) : 0f;
+            int fillWidth = Mth.floor(WIDTH * ratio);
+            if (fillWidth > 0) {
+                gfx.fill(xi, yi, xi + fillWidth, yi + HEIGHT, BAR_FILL);
+            }
 
             String text = EnergyType.FE.getStorageCompact(stored) + " / " + EnergyType.FE.getStorageCompact(capacity);
             gfx.drawCenteredString(Minecraft.getInstance().font, Component.literal(text).withColor(TEXT_COLOR),

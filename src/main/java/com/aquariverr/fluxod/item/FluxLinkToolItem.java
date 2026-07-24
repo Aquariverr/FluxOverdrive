@@ -17,6 +17,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import org.jetbrains.annotations.NotNull;
 
+import javax.annotation.Nullable;
 import javax.annotation.ParametersAreNonnullByDefault;
 import java.util.List;
 
@@ -40,61 +41,72 @@ public class FluxLinkToolItem extends Item {
         BlockEntity clickedEntity = level.getBlockEntity(clickedPos);
 
         if (player.isShiftKeyDown()) {
-            if (clickedEntity instanceof TileFluxLinkCrystal) {
-                stack.set(FluxOdDataComponents.FLUX_LINK_BINDER, GlobalPos.of(level.dimension(), clickedPos));
-                if (!level.isClientSide) {
-                    player.displayClientMessage(
-                            Component.translatable("message.flux_overdrive.crystal_bound").withStyle(ChatFormatting.GREEN),
-                            true);
-                }
-                return InteractionResult.SUCCESS;
+            if (!(clickedEntity instanceof TileFluxLinkCrystal crystal)) return InteractionResult.PASS;
+            if (level.isClientSide) return InteractionResult.SUCCESS;
+            if (!crystal.canPlayerAccess(player)) {
+                player.displayClientMessage(
+                        Component.translatable("message.flux_overdrive.access_denied").withStyle(ChatFormatting.RED),
+                        true);
+                return InteractionResult.FAIL;
             }
-            return InteractionResult.PASS;
+            stack.set(FluxOdDataComponents.FLUX_LINK_BINDER, GlobalPos.of(level.dimension(), clickedPos));
+            player.displayClientMessage(
+                    Component.translatable("message.flux_overdrive.crystal_bound").withStyle(ChatFormatting.GREEN),
+                    true);
+            return InteractionResult.SUCCESS;
         }
 
         if (isBound(stack)) {
             GlobalPos boundPos = getBound(stack);
-            if (boundPos.dimension() != level.dimension()) {
-                if (!level.isClientSide) {
-                    player.displayClientMessage(
-                            Component.translatable("message.flux_overdrive.wrong_dimension").withStyle(ChatFormatting.RED),
-                            true);
-                }
+            if (boundPos == null) return InteractionResult.PASS;
+            if (level.isClientSide) return InteractionResult.SUCCESS;
+            if (!boundPos.dimension().equals(level.dimension())) {
+                player.displayClientMessage(
+                        Component.translatable("message.flux_overdrive.wrong_dimension").withStyle(ChatFormatting.RED),
+                        true);
                 return InteractionResult.FAIL;
             }
 
             BlockPos crystalPos = boundPos.pos();
-            BlockEntity crystalEntity = level.getBlockEntity(crystalPos);
+            BlockEntity crystalEntity = level.isLoaded(crystalPos) ? level.getBlockEntity(crystalPos) : null;
             if (crystalEntity instanceof TileFluxLinkCrystal crystal) {
+                if (!crystal.canPlayerAccess(player)) {
+                    player.displayClientMessage(
+                            Component.translatable("message.flux_overdrive.access_denied").withStyle(ChatFormatting.RED),
+                            true);
+                    return InteractionResult.FAIL;
+                }
                 if (crystal.isLinked(clickedPos)) {
                     crystal.removeLink(clickedPos);
-                    if (!level.isClientSide) {
-                        player.displayClientMessage(
-                                Component.translatable("message.flux_overdrive.link_removed").withStyle(ChatFormatting.YELLOW),
-                                true);
-                    }
+                    player.displayClientMessage(
+                            Component.translatable("message.flux_overdrive.link_removed").withStyle(ChatFormatting.YELLOW),
+                            true);
                 } else if (!crystal.isInRange(clickedPos)) {
-                    if (!level.isClientSide) {
-                        player.displayClientMessage(
-                                Component.translatable("message.flux_overdrive.out_of_range").withStyle(ChatFormatting.RED),
-                                true);
-                    }
+                    player.displayClientMessage(
+                            Component.translatable("message.flux_overdrive.out_of_range").withStyle(ChatFormatting.RED),
+                            true);
+                    return InteractionResult.FAIL;
+                } else if (!crystal.isValidLinkTarget(clickedPos, side)) {
+                    player.displayClientMessage(
+                            Component.translatable("message.flux_overdrive.invalid_link_target").withStyle(ChatFormatting.RED),
+                            true);
                     return InteractionResult.FAIL;
                 } else {
-                    crystal.addLink(clickedPos, side);
-                    if (!level.isClientSide) {
+                    if (!crystal.addLink(clickedPos, side)) {
                         player.displayClientMessage(
-                                Component.translatable("message.flux_overdrive.link_added").withStyle(ChatFormatting.GREEN),
+                                Component.translatable("message.flux_overdrive.link_limit_reached").withStyle(ChatFormatting.RED),
                                 true);
+                        return InteractionResult.FAIL;
                     }
+                    player.displayClientMessage(
+                            Component.translatable("message.flux_overdrive.link_added").withStyle(ChatFormatting.GREEN),
+                            true);
                 }
                 return InteractionResult.SUCCESS;
             } else {
-                if (!level.isClientSide) {
-                    player.displayClientMessage(
-                            Component.translatable("message.flux_overdrive.crystal_missing").withStyle(ChatFormatting.RED),
-                            true);
-                }
+                player.displayClientMessage(
+                        Component.translatable("message.flux_overdrive.crystal_missing").withStyle(ChatFormatting.RED),
+                        true);
                 return InteractionResult.FAIL;
             }
         }
@@ -124,6 +136,7 @@ public class FluxLinkToolItem extends Item {
         return stack.has(FluxOdDataComponents.FLUX_LINK_BINDER);
     }
 
+    @Nullable
     public static GlobalPos getBound(ItemStack stack) {
         return stack.get(FluxOdDataComponents.FLUX_LINK_BINDER);
     }

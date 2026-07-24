@@ -7,6 +7,7 @@
     "flux_overdrive:nether_flux_storage",
     "flux_overdrive:flux_storage_terminal",
     "flux_overdrive:flux_fe_storage",
-    "flux_overdrive:flux_link_crystal"
+    "flux_overdrive:flux_link_crystal",
+    "flux_overdrive:flux_auto_link_crystal"
   ]
 }

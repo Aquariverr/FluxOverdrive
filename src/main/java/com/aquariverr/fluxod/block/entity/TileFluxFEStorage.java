@@ -21,7 +21,8 @@ import sonar.fluxnetworks.api.device.FluxDeviceType;
 import sonar.fluxnetworks.api.device.IFluxPoint;
 import sonar.fluxnetworks.api.energy.IFNEnergyStorage;
 import sonar.fluxnetworks.common.device.TileFluxConnector;
-import sonar.fluxnetworks.common.item.FluxStorageItem;
+import sonar.fluxnetworks.register.Channel;
+import sonar.fluxnetworks.register.Messages;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -30,7 +31,8 @@ public class TileFluxFEStorage extends TileFluxConnector implements IFluxPoint {
 
     private static final int FE_STORAGE_SLOTS = 4;
 
-    private final FEStorageHandler mHandler = new FEStorageHandler(Config.feStorageTransfer, Config.feStorageCapacity);
+    private final FEStorageHandler mHandler;
+    private final TickTransferBudget externalTransferBudget = new TickTransferBudget();
 
     @Nullable
     private EnergyStorage mEnergyCap;
@@ -46,20 +48,33 @@ public class TileFluxFEStorage extends TileFluxConnector implements IFluxPoint {
 
         @Override
         public boolean isItemValid(int slot, @Nonnull ItemStack stack) {
-            return stack.getItem() instanceof FluxStorageItem;
+            return TileFluxStorage.isConsumableStorageItem(stack);
         }
     };
 
     public TileFluxFEStorage(@Nonnull BlockPos pos, @Nonnull BlockState state) {
         super(RegistryBlockEntityTypes.FLUX_FE_STORAGE.get(), pos, state);
+        mHandler = new FEStorageHandler(Config.feStorageTransfer, Config.feStorageCapacity,
+                this::markEnergyChanged, this::getExternalTransferRemaining, this::recordExternalTransfer);
     }
 
     @Override
     public void onLoad() {
         super.onLoad();
         if (pendingInv != null && level != null) {
-            inventory.deserializeNBT(level.registryAccess(), pendingInv);
+            deserializeInventory(pendingInv);
             pendingInv = null;
+        }
+    }
+
+    @Override
+    protected void onServerTick() {
+        super.onServerTick();
+        if ((mFlags & FLAG_ENERGY_CHANGED) != 0 && level != null && (level.getGameTime() & 7) == 0) {
+            Channel.get().sendToTrackingChunk(
+                    Messages.makeDeviceBuffer(this, FEStorageHandler.BUFFER_UPDATE_PACKET),
+                    level.getChunkAt(worldPosition));
+            mFlags &= ~FLAG_ENERGY_CHANGED;
         }
     }
 
@@ -154,31 +169,52 @@ public class TileFluxFEStorage extends TileFluxConnector implements IFluxPoint {
         }
         if (type != FluxConstants.NBT_TILE_SETTINGS && type != FluxConstants.NBT_TILE_UPDATE && tag.contains("Inventory")) {
             if (level != null) {
-                inventory.deserializeNBT(level.registryAccess(), tag.getCompound("Inventory"));
+                deserializeInventory(tag.getCompound("Inventory"));
             } else {
                 pendingInv = tag.getCompound("Inventory");
             }
         }
         mHandler.clearNetworkBuffer();
-        if (type == FluxConstants.NBT_SAVE_ALL && level != null && !level.isClientSide) {
+    }
+
+    private void consumeItem(int slot) {
+        TileFluxStorage.StorageConsumeResult result = TileFluxStorage.inspectStorageItem(inventory, slot);
+        if (result == null) return;
+
+        long newCapacity;
+        long newEnergy;
+        try {
+            newCapacity = Math.addExact(mHandler.getFECapacity(), result.capacity());
+            newEnergy = Math.addExact(mHandler.getFEBuffer(), result.energy());
+        } catch (ArithmeticException ignored) {
+            return;
+        }
+
+        TileFluxStorage.consumeStorageItem(inventory, slot);
+        mHandler.setFECapacity(newCapacity);
+        mHandler.setFEBuffer(newEnergy);
+
+        if (level != null && !level.isClientSide) {
+            markEnergyChanged();
+            level.sendBlockUpdated(worldPosition, getBlockState(), getBlockState(), Block.UPDATE_CLIENTS);
             setChanged();
         }
     }
 
-    private void consumeItem(int slot) {
-        TileFluxStorage.StorageConsumeResult result = TileFluxStorage.tryConsumeStorageItem(inventory, slot);
-        if (result == null) return;
+    private void deserializeInventory(CompoundTag inventoryTag) {
+        if (level == null) return;
+        CompoundTag sanitized = inventoryTag.copy();
+        sanitized.putInt("Size", FE_STORAGE_SLOTS);
+        inventory.deserializeNBT(level.registryAccess(), sanitized);
+    }
 
-        long newCapacity = mHandler.getFECapacity() + result.capacity();
-        mHandler.setFECapacity(newCapacity);
-        if (result.energy() > 0) {
-            mHandler.setFEBuffer(mHandler.getFEBuffer() + result.energy());
-        }
+    private long getExternalTransferRemaining() {
+        if (level == null) return 0;
+        return externalTransferBudget.remaining(level.getGameTime(), mHandler.getLimit());
+    }
 
-        if (level != null && !level.isClientSide) {
-            level.sendBlockUpdated(worldPosition, getBlockState(), getBlockState(), Block.UPDATE_ALL);
-            setChanged();
-        }
+    private void recordExternalTransfer(long amount) {
+        if (level != null) externalTransferBudget.record(level.getGameTime(), amount);
     }
 
     private class EnergyStorage implements IEnergyStorage, IFNEnergyStorage {
@@ -210,16 +246,18 @@ public class TileFluxFEStorage extends TileFluxConnector implements IFluxPoint {
 
         @Override
         public boolean canReceive() {
-            return mHandler.getFEBuffer() < mHandler.getFECapacity();
+            return mHandler.getFECapacity() > 0;
         }
 
         @Override
         public long receiveEnergyL(long maxReceive, boolean simulate) {
+            if (maxReceive <= 0) return 0;
             long space = mHandler.getFECapacity() - mHandler.getFEBuffer();
-            long received = Math.min(maxReceive, space);
+            long received = Math.min(Math.min(maxReceive, space), getExternalTransferRemaining());
             if (!simulate && received > 0) {
                 mHandler.setFEBuffer(mHandler.getFEBuffer() + received);
                 mHandler.addExternalChange(received);
+                recordExternalTransfer(received);
                 markEnergyChanged();
             }
             return received;
@@ -227,11 +265,13 @@ public class TileFluxFEStorage extends TileFluxConnector implements IFluxPoint {
 
         @Override
         public long extractEnergyL(long maxExtract, boolean simulate) {
+            if (maxExtract <= 0) return 0;
             long available = mHandler.getFEBuffer();
-            long extracted = Math.min(maxExtract, available);
+            long extracted = Math.min(Math.min(maxExtract, available), getExternalTransferRemaining());
             if (!simulate && extracted > 0) {
                 mHandler.setFEBuffer(available - extracted);
                 mHandler.addExternalChange(-extracted);
+                recordExternalTransfer(extracted);
                 markEnergyChanged();
             }
             return extracted;

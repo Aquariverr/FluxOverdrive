@@ -32,6 +32,9 @@
   "message.flux_overdrive.link_added": "方块已链接到水晶",
   "message.flux_overdrive.link_removed": "方块已从水晶断开链接",
   "message.flux_overdrive.out_of_range": "目标超出连接范围",
+  "message.flux_overdrive.access_denied": "你没有访问此通量网络的权限",
+  "message.flux_overdrive.invalid_link_target": "所选表面无法接收能量",
+  "message.flux_overdrive.link_limit_reached": "此水晶已达到链接数量上限",
 
   "flux_overdrive.configuration.title": "Flux Overdrive 设置",
   "flux_overdrive.configuration.section.flux_overdrive.server.toml": "服务器设置",
@@ -44,6 +47,7 @@
   "flux_overdrive.configuration.feStorageTransfer": "通量FE存储器 - 默认传输限制 (FE/t)",
   "flux_overdrive.configuration.autoLinkRadius": "通量自动链接水晶 - 连接范围 (格)",
   "flux_overdrive.configuration.autoLinkScanCooldown": "通量自动链接水晶 - 扫描冷却 (ticks)",
+  "flux_overdrive.configuration.maxCrystalLinks": "通量链接水晶 - 最大链接数",
 
   "jade.flux_overdrive.links": "链接数",
   "jade.flux_overdrive.auto_links": "自动链接",

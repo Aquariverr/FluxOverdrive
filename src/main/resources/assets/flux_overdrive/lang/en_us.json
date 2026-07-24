@@ -32,6 +32,9 @@
   "message.flux_overdrive.link_added": "Block linked to crystal",
   "message.flux_overdrive.link_removed": "Block unlinked from crystal",
   "message.flux_overdrive.out_of_range": "Target is out of range",
+  "message.flux_overdrive.access_denied": "You do not have access to this Flux Network",
+  "message.flux_overdrive.invalid_link_target": "The selected face cannot receive energy",
+  "message.flux_overdrive.link_limit_reached": "This crystal has reached its link limit",
 
   "flux_overdrive.configuration.title": "Flux Overdrive Config",
   "flux_overdrive.configuration.section.flux_overdrive.server.toml": "Flux Overdrive Config",
@@ -44,6 +47,7 @@
   "flux_overdrive.configuration.feStorageTransfer": "Flux FE Storage - Default Transfer Limit (FE/t)",
   "flux_overdrive.configuration.autoLinkRadius": "Flux Auto Link Crystal - Connection Range (blocks)",
   "flux_overdrive.configuration.autoLinkScanCooldown": "Flux Auto Link Crystal - Scan Cooldown (ticks)",
+  "flux_overdrive.configuration.maxCrystalLinks": "Flux Link Crystal - Maximum Links",
 
   "jade.flux_overdrive.links": "Links",
   "jade.flux_overdrive.auto_links": "Auto Links",

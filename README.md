@@ -3,6 +3,15 @@
 
 ### Homepage [CurseForge](https://www.curseforge.com/minecraft/mc-mods/flux-overdrive)
 For any suggestions or bugs, open a new issue
+
+### Requirements
+
+- Minecraft 1.21.1
+- NeoForge 21.1.219 or newer for Minecraft 1.21.1
+- Java 21
+- Flux Networks 8.x
+- Jade 15.x or newer is optional
+
 ### Introduction
 ![](https://media.forgecdn.net/attachments/description/null/description_9a130844-fd20-4739-a127-7781840e7109.png)
 ![](https://media.forgecdn.net/attachments/description/null/description_d38cfabd-00b4-4f47-9af9-24719ef7f8e7.png)
@@ -26,3 +35,7 @@ Added a wireless device, similar in use to the wireless crystal from Draconic Ev
 ![](https://media.forgecdn.net/attachments/description/null/description_e141e65b-6dc4-43e9-8aaf-aea22331b368.png)
 
 This mod is also compatible with GTCeu Modern's EU system.
+
+### License
+
+Flux Overdrive is available under the [MIT License](LICENSE).

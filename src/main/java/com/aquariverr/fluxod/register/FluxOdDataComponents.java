@@ -28,7 +28,6 @@ public class FluxOdDataComponents {
     @SuppressWarnings("deprecation")
     public static final DataComponentType<CustomData> LINK_TARGETS = DataComponentType.<CustomData>builder()
             .persistent(CustomData.CODEC)
-            .networkSynchronized(CustomData.STREAM_CODEC)
             .build();
 
     static {

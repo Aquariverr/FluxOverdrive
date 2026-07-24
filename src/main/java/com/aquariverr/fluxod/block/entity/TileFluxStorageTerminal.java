@@ -13,7 +13,6 @@ import net.neoforged.neoforge.items.ItemStackHandler;
 import org.jetbrains.annotations.NotNull;
 import sonar.fluxnetworks.api.FluxConstants;
 import sonar.fluxnetworks.common.device.FluxStorageHandler;
-import sonar.fluxnetworks.common.item.FluxStorageItem;
 
 import javax.annotation.Nonnull;
 
@@ -21,8 +20,10 @@ public class TileFluxStorageTerminal extends TileFluxStorage {
 
     private static final int SLOTS = 4;
     private static final long BASE_TRANSFER = 1_000_000L;
+    private static final String DATA_VERSION_TAG = "FluxOverdriveTerminalVersion";
+    private static final int DATA_VERSION = 1;
 
-    private final TerminalHandler handler = new TerminalHandler();
+    private final TerminalHandler handler;
     private long totalCapacity;
 
     private final ItemStackHandler inventory = new ItemStackHandler(SLOTS) {
@@ -33,13 +34,18 @@ public class TileFluxStorageTerminal extends TileFluxStorage {
 
         @Override
         public boolean isItemValid(int slot, @Nonnull ItemStack stack) {
-            return stack.getItem() instanceof FluxStorageItem;
+            return TileFluxStorage.isConsumableStorageItem(stack);
         }
     };
 
     public TileFluxStorageTerminal(@Nonnull BlockPos pos, @Nonnull BlockState state) {
-        super(RegistryBlockEntityTypes.FLUX_STORAGE_TERMINAL.get(), pos, state, null);
-        handler.setTerminal(this);
+        this(pos, state, new TerminalHandler());
+    }
+
+    private TileFluxStorageTerminal(BlockPos pos, BlockState state, TerminalHandler handler) {
+        super(RegistryBlockEntityTypes.FLUX_STORAGE_TERMINAL.get(), pos, state, handler);
+        this.handler = handler;
+        handler.attach(this);
     }
 
     @Override
@@ -50,8 +56,9 @@ public class TileFluxStorageTerminal extends TileFluxStorage {
 
     @Override
     protected void applyImplicitComponents(BlockEntity.@NotNull DataComponentInput input) {
+        totalCapacity = Math.max(0, input.getOrDefault(FluxOdDataComponents.TOTAL_CAPACITY, 0L));
         super.applyImplicitComponents(input);
-        totalCapacity = input.getOrDefault(FluxOdDataComponents.TOTAL_CAPACITY, 0L);
+        handler.sanitize();
     }
 
     @Nonnull
@@ -82,18 +89,29 @@ public class TileFluxStorageTerminal extends TileFluxStorage {
 
     @SuppressWarnings("unused")
     public void setTotalCapacity(long capacity) {
-        totalCapacity = capacity;
+        totalCapacity = Math.max(0, capacity);
+        handler.sanitize();
     }
 
     private void consumeItem(int slot) {
-        StorageConsumeResult result = TileFluxStorage.tryConsumeStorageItem(inventory, slot);
+        StorageConsumeResult result = TileFluxStorage.inspectStorageItem(inventory, slot);
         if (result == null) return;
 
-        totalCapacity += result.capacity();
+        long newCapacity;
+        try {
+            newCapacity = Math.addExact(totalCapacity, result.capacity());
+        } catch (ArithmeticException ignored) {
+            return;
+        }
+
+        TileFluxStorage.consumeStorageItem(inventory, slot);
+        long oldCapacity = totalCapacity;
+        totalCapacity = newCapacity;
+        handler.onCapacityChanged(oldCapacity);
         handler.addEnergy(result.energy());
 
         if (level != null && !level.isClientSide) {
-            level.sendBlockUpdated(worldPosition, getBlockState(), getBlockState(), Block.UPDATE_ALL);
+            level.sendBlockUpdated(worldPosition, getBlockState(), getBlockState(), Block.UPDATE_CLIENTS);
             setChanged();
         }
     }
@@ -102,34 +120,52 @@ public class TileFluxStorageTerminal extends TileFluxStorage {
     public void writeCustomTag(@Nonnull CompoundTag tag, byte type) {
         super.writeCustomTag(tag, type);
         tag.putLong("TotalCapacity", totalCapacity);
+        tag.putInt(DATA_VERSION_TAG, DATA_VERSION);
     }
 
     @Override
     public void readCustomTag(@Nonnull CompoundTag tag, byte type) {
+        boolean persistedData = type == FluxConstants.NBT_SAVE_ALL || type == FluxConstants.NBT_TILE_DROP;
+        boolean legacyZeroLimit = persistedData && !tag.contains(DATA_VERSION_TAG) && tag.getLong("limit") == 0;
         if (tag.contains("TotalCapacity")) {
-            totalCapacity = tag.getLong("TotalCapacity");
+            totalCapacity = Math.max(0, tag.getLong("TotalCapacity"));
         }
         super.readCustomTag(tag, type);
-        if (type == FluxConstants.NBT_SAVE_ALL) {
-            setChanged();
-        }
+        if (legacyZeroLimit && totalCapacity > 0) handler.setLimit(BASE_TRANSFER);
+        handler.sanitize();
     }
 
-    private class TerminalHandler extends FluxStorageHandler {
+    private static class TerminalHandler extends FluxStorageHandler {
 
         private TileFluxStorageTerminal terminal;
 
         TerminalHandler() {
-            super(BASE_TRANSFER);
+            super(0);
         }
 
-        void setTerminal(TileFluxStorageTerminal t) {
+        void attach(TileFluxStorageTerminal t) {
             this.terminal = t;
         }
 
+        void onCapacityChanged(long oldCapacity) {
+            if (oldCapacity == 0 && getMaxEnergyStorage() > 0 && getRawLimit() == 0) {
+                setLimit(BASE_TRANSFER);
+            }
+            sanitize();
+        }
+
         void addEnergy(long amount) {
-            addToBuffer(amount);
-            mFlags |= FLAG_ENERGY_CHANGED;
+            long space = Math.max(0, getMaxEnergyStorage() - mBuffer);
+            long added = Math.min(Math.max(0, amount), space);
+            if (added > 0) {
+                addToBuffer(added);
+            }
+        }
+
+        void sanitize() {
+            long capacity = getMaxEnergyStorage();
+            mBuffer = Math.max(0, Math.min(mBuffer, capacity));
+            setLimit(getRawLimit());
         }
 
         @Override

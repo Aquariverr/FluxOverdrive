@@ -28,6 +28,8 @@ import java.util.List;
 @EventBusSubscriber(modid = FluxOverdrive.MODID, value = Dist.CLIENT)
 public class FluxOverdriveClientEvents {
 
+    private static final double MAX_HIGHLIGHT_DISTANCE_SQR = 128.0 * 128.0;
+
     @SubscribeEvent
     @SuppressWarnings("resource")
     public static void onRenderLevelStage(RenderLevelStageEvent event) {
@@ -46,10 +48,12 @@ public class FluxOverdriveClientEvents {
         if (!FluxLinkToolItem.isBound(stack)) return;
 
         GlobalPos boundPos = FluxLinkToolItem.getBound(stack);
+        if (boundPos == null) return;
         Level level = player.level();
-        if (boundPos.dimension() != level.dimension()) return;
+        if (!boundPos.dimension().equals(level.dimension())) return;
 
         PoseStack poseStack = event.getPoseStack();
+        if (poseStack == null) return;
         Camera camera = mc.gameRenderer.getMainCamera();
         Vec3 camPos = camera.getPosition();
         MultiBufferSource.BufferSource source = mc.renderBuffers().bufferSource();
@@ -58,20 +62,24 @@ public class FluxOverdriveClientEvents {
         poseStack.translate(-camPos.x, -camPos.y, -camPos.z);
 
         BlockPos crystalPos = boundPos.pos();
-        BlockEntity crystalEntity = level.getBlockEntity(crystalPos);
+        BlockEntity crystalEntity = level.isLoaded(crystalPos) ? level.getBlockEntity(crystalPos) : null;
 
-        renderCrystalHighlight(poseStack, source, crystalPos, crystalEntity instanceof TileFluxLinkCrystal);
+        if (Vec3.atCenterOf(crystalPos).distanceToSqr(camPos) <= MAX_HIGHLIGHT_DISTANCE_SQR) {
+            renderCrystalHighlight(poseStack, source, crystalPos, crystalEntity instanceof TileFluxLinkCrystal);
+        }
 
         if (crystalEntity instanceof TileFluxLinkCrystal crystal) {
             List<TileFluxLinkCrystal.LinkTarget> targets = crystal.getLinkedTargets();
             for (TileFluxLinkCrystal.LinkTarget target : targets) {
-                if (target.pos().dimension() == level.dimension()) {
+                BlockPos targetPos = target.pos().pos();
+                if (target.pos().dimension().equals(level.dimension()) && level.isLoaded(targetPos)
+                        && Vec3.atCenterOf(targetPos).distanceToSqr(camPos) <= MAX_HIGHLIGHT_DISTANCE_SQR) {
                     renderLinkTargetHighlight(poseStack, source, target);
                 }
             }
         }
 
-        source.endBatch();
+        source.endBatch(RenderType.LINES);
         poseStack.popPose();
     }
 

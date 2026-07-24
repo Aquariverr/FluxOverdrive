@@ -13,8 +13,7 @@
               "function": "minecraft:copy_components",
               "include": [
                 "fluxnetworks:device_config",
-                "fluxnetworks:stored_energy",
-                "minecraft:block_entity_data"
+                "fluxnetworks:stored_energy"
               ],
               "source": "block_entity"
             }
