@@ -21,6 +21,7 @@
   "tooltip.flux_overdrive.flux_link_tool.unbound": "No crystal bound",
 
   "tooltip.flux_overdrive.flux_link_crystal": "Wireless energy point: use Flux Link Tool to bind machines",
+  "tooltip.flux_overdrive.flux_link_crystal.redstone": "Redstone pulse removes invalid links",
   "tooltip.flux_overdrive.flux_auto_link_crystal.1": "Auto-detects newly placed blocks within %s blocks",
   "tooltip.flux_overdrive.flux_auto_link_crystal.2": "Redstone pulse triggers scan, connects blocks and removes invalid links",
   "tooltip.flux_overdrive.flux_auto_link_crystal.3": "Also supports Flux Link Tool binding",

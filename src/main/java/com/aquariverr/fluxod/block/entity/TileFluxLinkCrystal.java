@@ -127,12 +127,26 @@ public class TileFluxLinkCrystal extends TileFluxConnector implements IFluxPoint
         return linkedTargetsView;
     }
 
+    @SuppressWarnings("BooleanMethodIsAlwaysInverted")
     public boolean isValidLinkTarget(BlockPos targetPos, Direction side) {
         if (level == null || targetPos.equals(worldPosition) || !level.isLoaded(targetPos)) return false;
         BlockEntity target = level.getBlockEntity(targetPos);
         if (target == null) return false;
         IBlockEnergyConnector connector = EnergyUtils.getConnector(target, side);
         return connector != null && connector.canSendTo(target, side);
+    }
+
+    public void removeInvalidLinks() {
+        ServerLevel serverLevel = getLinkLevel();
+        if (serverLevel == null) return;
+
+        boolean changed = linkedTargets.removeIf(target -> {
+            GlobalPos globalPos = target.pos();
+            if (!globalPos.dimension().equals(serverLevel.dimension())) return true;
+            BlockPos pos = globalPos.pos();
+            return serverLevel.isLoaded(pos) && !isValidLinkTarget(pos, target.side());
+        });
+        if (changed) linksChanged();
     }
 
     protected int getMaxLinks() {

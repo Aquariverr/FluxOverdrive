@@ -24,5 +24,7 @@ public class FluxLinkCrystalItem extends FluxDeviceItem {
         super.appendHoverText(stack, context, tooltip, flag);
         tooltip.add(Component.translatable("tooltip.flux_overdrive.flux_link_crystal")
                 .withStyle(ChatFormatting.GRAY));
+        tooltip.add(Component.translatable("tooltip.flux_overdrive.flux_link_crystal.redstone")
+                .withStyle(ChatFormatting.GRAY));
     }
 }

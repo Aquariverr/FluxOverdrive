@@ -21,6 +21,7 @@
   "tooltip.flux_overdrive.flux_link_tool.unbound": "未绑定水晶",
 
   "tooltip.flux_overdrive.flux_link_crystal": "无线能量点：使用通量链接工具绑定机器",
+  "tooltip.flux_overdrive.flux_link_crystal.redstone": "红石脉冲取消无效链接",
   "tooltip.flux_overdrive.flux_auto_link_crystal.1": "自动检测附近 %s 格新放置的方块进行连接",
   "tooltip.flux_overdrive.flux_auto_link_crystal.2": "红石脉冲触发主动扫描，连接范围内方块并消除无效连接",
   "tooltip.flux_overdrive.flux_auto_link_crystal.3": "同样支持通量链接工具绑定",
