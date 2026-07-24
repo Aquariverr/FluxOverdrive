@@ -91,7 +91,7 @@ Adds high-capacity storage, FE bridging, and wireless energy links for Flux Netw
 [[dependencies.${mod_id}]]
     modId="fluxnetworks"
     type="required"
-    versionRange="[8.0.0,9.0.0)"
+    versionRange="[8.0.0,)"
     ordering="NONE"
     side="BOTH"
 
