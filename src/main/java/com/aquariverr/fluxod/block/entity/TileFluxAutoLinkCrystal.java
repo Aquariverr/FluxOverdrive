@@ -5,6 +5,7 @@ import com.aquariverr.fluxod.register.RegistryBlockEntityTypes;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.GlobalPos;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.Level;
@@ -282,13 +283,16 @@ public class TileFluxAutoLinkCrystal extends TileFluxLinkCrystal implements IFlu
     @Nullable
     public static Direction findValidEnergySide(Level level, BlockPos pos) {
         BlockEntity blockEntity = level.getBlockEntity(pos);
-        if (blockEntity == null) return null;
+        if (blockEntity == null || Config.autoLinkBlockBlacklist.contains(
+                BuiltInRegistries.BLOCK.getKey(blockEntity.getBlockState().getBlock()))) {
+            return null;
+        }
         for (Direction direction : Direction.values()) {
             IBlockEnergyConnector connector = EnergyUtils.getConnector(blockEntity, direction);
             if (connector != null
                     && connector.canSendTo(blockEntity, direction)
                     && (connector.sendTo(INPUT_PROBE_ENERGY, blockEntity, direction, true) > 0
-                    || isFullEnergyStorage(blockEntity, direction))) {
+                            || isFullEnergyStorage(blockEntity, direction))) {
                 return direction;
             }
         }

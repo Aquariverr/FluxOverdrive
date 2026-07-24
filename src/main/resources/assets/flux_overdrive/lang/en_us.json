@@ -24,6 +24,7 @@
   "tooltip.flux_overdrive.flux_auto_link_crystal.1": "Auto-detects newly placed blocks within %s blocks",
   "tooltip.flux_overdrive.flux_auto_link_crystal.2": "Redstone pulse triggers scan, connects blocks and removes invalid links",
   "tooltip.flux_overdrive.flux_auto_link_crystal.3": "Also supports Flux Link Tool binding",
+  "tooltip.flux_overdrive.flux_auto_link_crystal.4": "Auto-link block blacklist can be extended in the config file",
 
   "message.flux_overdrive.crystal_bound": "Crystal bound to tool",
   "message.flux_overdrive.crystal_unbound": "Crystal unbound from tool",
@@ -47,6 +48,7 @@
   "flux_overdrive.configuration.feStorageTransfer": "Flux FE Storage - Default Transfer Limit (FE/t)",
   "flux_overdrive.configuration.autoLinkRadius": "Flux Auto Link Crystal - Connection Range (blocks)",
   "flux_overdrive.configuration.autoLinkScanCooldown": "Flux Auto Link Crystal - Scan Cooldown (ticks)",
+  "flux_overdrive.configuration.autoLinkBlockBlacklist": "Flux Auto Link Crystal - Block Blacklist",
   "flux_overdrive.configuration.maxCrystalLinks": "Flux Link Crystal - Maximum Links",
 
   "jade.flux_overdrive.links": "Links",

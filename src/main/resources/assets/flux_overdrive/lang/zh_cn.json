@@ -24,6 +24,7 @@
   "tooltip.flux_overdrive.flux_auto_link_crystal.1": "自动检测附近 %s 格新放置的方块进行连接",
   "tooltip.flux_overdrive.flux_auto_link_crystal.2": "红石脉冲触发主动扫描，连接范围内方块并消除无效连接",
   "tooltip.flux_overdrive.flux_auto_link_crystal.3": "同样支持通量链接工具绑定",
+  "tooltip.flux_overdrive.flux_auto_link_crystal.4": "可在配置文件中添加自动链接黑名单",
 
   "message.flux_overdrive.crystal_bound": "已绑定水晶到此工具",
   "message.flux_overdrive.crystal_unbound": "已取消工具的水晶绑定",
@@ -47,6 +48,7 @@
   "flux_overdrive.configuration.feStorageTransfer": "通量FE存储器 - 默认传输限制 (FE/t)",
   "flux_overdrive.configuration.autoLinkRadius": "通量自动链接水晶 - 连接范围 (格)",
   "flux_overdrive.configuration.autoLinkScanCooldown": "通量自动链接水晶 - 扫描冷却 (ticks)",
+  "flux_overdrive.configuration.autoLinkBlockBlacklist": "通量自动链接水晶 - 方块黑名单",
   "flux_overdrive.configuration.maxCrystalLinks": "通量链接水晶 - 最大链接数",
 
   "jade.flux_overdrive.links": "链接数",

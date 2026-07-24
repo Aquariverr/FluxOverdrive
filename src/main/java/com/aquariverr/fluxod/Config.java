@@ -1,11 +1,26 @@
 package com.aquariverr.fluxod;
 
+import net.minecraft.resources.ResourceLocation;
 import net.neoforged.fml.event.config.ModConfigEvent;
 import net.neoforged.neoforge.common.ModConfigSpec;
 
 import javax.annotation.Nonnull;
+import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 public class Config {
+    private static final List<String> DEFAULT_AUTO_LINK_BLOCK_BLACKLIST = List.of(
+            "ae2:pattern_provider",
+            "advanced_ae:small_adv_pattern_provider",
+            "extendedae:ex_pattern_provider_part",
+            "appflux:flux_accessor",
+            "extendedae:ex_pattern_provider",
+            "ae2:cable_pattern_provider",
+            "advanced_ae:small_adv_pattern_provider_part",
+            "appflux:flux_accessor_part"
+    );
+
     public static long enderCapacity = 64_000_000_000L;
     public static long enderTransfer = 640_000_000L;
     public static long netherCapacity = 8_000_000_000L;
@@ -15,6 +30,7 @@ public class Config {
     public static long autoLinkRadius = 16L;
     public static long autoLinkScanCooldown = 20L;
     public static long maxCrystalLinks = 256L;
+    public static Set<ResourceLocation> autoLinkBlockBlacklist = Set.of();
 
     private static final ModConfigSpec.Builder BUILDER = new ModConfigSpec.Builder();
 
@@ -61,6 +77,11 @@ public class Config {
             .comment("Maximum number of targets stored by one link crystal")
             .defineInRange("maxCrystalLinks", 256L, 1, 1024);
 
+    public static final ModConfigSpec.ConfigValue<List<? extends String>> AUTO_LINK_BLOCK_BLACKLIST = BUILDER
+            .comment("Block IDs ignored by the Flux Auto Link Crystal (for example: minecraft:furnace)")
+            .defineListAllowEmpty("autoLinkBlockBlacklist", DEFAULT_AUTO_LINK_BLOCK_BLACKLIST,
+                    () -> "minecraft:air", Config::isResourceLocation);
+
     public static final ModConfigSpec SPEC = BUILDER.build();
 
     static void onConfigEvent(@Nonnull ModConfigEvent event) {
@@ -77,7 +98,14 @@ public class Config {
             autoLinkRadius = AUTO_LINK_RADIUS.get();
             autoLinkScanCooldown = AUTO_LINK_SCAN_COOLDOWN.get();
             maxCrystalLinks = MAX_CRYSTAL_LINKS.get();
+            autoLinkBlockBlacklist = AUTO_LINK_BLOCK_BLACKLIST.get().stream()
+                    .map(ResourceLocation::parse)
+                    .collect(Collectors.toUnmodifiableSet());
             FluxOverdrive.LOGGER.info("Flux Overdrive config loaded");
         }
+    }
+
+    private static boolean isResourceLocation(Object value) {
+        return value instanceof String string && ResourceLocation.tryParse(string) != null;
     }
 }
