@@ -11,11 +11,16 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.LevelChunk;
+import net.neoforged.neoforge.capabilities.Capabilities;
+import net.neoforged.neoforge.energy.IEnergyStorage;
+import sonar.fluxnetworks.api.FluxCapabilities;
 import sonar.fluxnetworks.api.FluxConstants;
 import sonar.fluxnetworks.api.device.IFluxPoint;
 import sonar.fluxnetworks.api.energy.IBlockEnergyConnector;
+import sonar.fluxnetworks.api.energy.IFNEnergyStorage;
 import sonar.fluxnetworks.common.device.FluxConnectorHandler;
 import sonar.fluxnetworks.common.util.EnergyUtils;
+import sonar.fluxnetworks.common.util.FluxUtils;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -33,6 +38,8 @@ import java.util.concurrent.ConcurrentHashMap;
 
 @ParametersAreNonnullByDefault
 public class TileFluxAutoLinkCrystal extends TileFluxLinkCrystal implements IFluxPoint {
+
+    private static final long INPUT_PROBE_ENERGY = 4L;
 
     private static final Map<ResourceKey<Level>, Map<Long, Set<BlockPos>>> ACTIVE_CRYSTALS =
             new ConcurrentHashMap<>();
@@ -265,17 +272,6 @@ public class TileFluxAutoLinkCrystal extends TileFluxLinkCrystal implements IFlu
                     if (pos.equals(worldPosition) || !isInRange(pos)) continue;
 
                     Direction side = findValidEnergySide(serverLevel, pos);
-                    if (side == null) {
-                        int existingIndex = findAutoLink(GlobalPos.of(serverLevel.dimension(), pos));
-                        if (existingIndex >= 0) {
-                            LinkTarget existing = autoLinkedTargets.get(existingIndex);
-                            if (hasEnergyCapability(blockEntity, existing.side())) {
-                                side = existing.side();
-                            } else {
-                                side = findEnergyCapabilitySide(blockEntity);
-                            }
-                        }
-                    }
                     if (side != null) discovered.put(pos.immutable(), side);
                 }
             }
@@ -289,22 +285,31 @@ public class TileFluxAutoLinkCrystal extends TileFluxLinkCrystal implements IFlu
         if (blockEntity == null) return null;
         for (Direction direction : Direction.values()) {
             IBlockEnergyConnector connector = EnergyUtils.getConnector(blockEntity, direction);
-            if (connector != null && connector.canSendTo(blockEntity, direction)) return direction;
+            if (connector != null
+                    && connector.canSendTo(blockEntity, direction)
+                    && (connector.sendTo(INPUT_PROBE_ENERGY, blockEntity, direction, true) > 0
+                    || isFullEnergyStorage(blockEntity, direction))) {
+                return direction;
+            }
         }
         return null;
     }
 
-    private static boolean hasEnergyCapability(BlockEntity blockEntity, Direction side) {
-        IBlockEnergyConnector connector = EnergyUtils.getConnector(blockEntity, side);
-        return connector != null && connector.hasCapability(blockEntity, side);
-    }
-
-    @Nullable
-    private static Direction findEnergyCapabilitySide(BlockEntity blockEntity) {
-        for (Direction direction : Direction.values()) {
-            if (hasEnergyCapability(blockEntity, direction)) return direction;
+    private static boolean isFullEnergyStorage(BlockEntity blockEntity, Direction direction) {
+        IFNEnergyStorage fnStorage = FluxUtils.get(blockEntity, FluxCapabilities.BLOCK, direction);
+        if (fnStorage != null) {
+            long capacity = fnStorage.getMaxEnergyStoredL();
+            return capacity > 0 && fnStorage.getEnergyStoredL() >= capacity;
         }
-        return null;
+
+        IEnergyStorage feStorage = FluxUtils.get(blockEntity, Capabilities.EnergyStorage.BLOCK, direction);
+        if (feStorage != null) {
+            int capacity = feStorage.getMaxEnergyStored();
+            return capacity > 0 && feStorage.getEnergyStored() >= capacity;
+        }
+
+        // Other registered connectors, such as GTCEu, expose side input mode through canSendTo().
+        return true;
     }
 
     @Override
