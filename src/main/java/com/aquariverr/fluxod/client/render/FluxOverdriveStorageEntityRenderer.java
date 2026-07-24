@@ -1,6 +1,6 @@
 package com.aquariverr.fluxod.client.render;
 
-import com.aquariverr.fluxod.block.entity.TileFluxFEStorage;
+import com.aquariverr.fluxod.block.entity.TileFluxStorage;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import net.minecraft.client.renderer.MultiBufferSource;
@@ -13,10 +13,10 @@ import sonar.fluxnetworks.client.render.FluxStorageRenderType;
 import javax.annotation.ParametersAreNonnullByDefault;
 
 @ParametersAreNonnullByDefault
-public class FluxFEStorageEntityRenderer implements BlockEntityRenderer<TileFluxFEStorage> {
+public class FluxOverdriveStorageEntityRenderer implements BlockEntityRenderer<TileFluxStorage> {
 
-    public static final BlockEntityRendererProvider<TileFluxFEStorage> PROVIDER =
-            ctx -> new FluxFEStorageEntityRenderer();
+    public static final BlockEntityRendererProvider<TileFluxStorage> PROVIDER =
+            context -> new FluxOverdriveStorageEntityRenderer();
 
     private static final float START = 0.125F;
     private static final float END = 0.875F;
@@ -26,13 +26,10 @@ public class FluxFEStorageEntityRenderer implements BlockEntityRenderer<TileFlux
     private static final int FULL_BRIGHT = 15728880;
 
     @Override
-    public void render(TileFluxFEStorage tile, float partialTick, PoseStack poseStack,
+    public void render(TileFluxStorage tile, float partialTick, PoseStack poseStack,
                        MultiBufferSource bufferSource, int light, int overlay) {
-        long buffer = tile.getFEBuffer();
-        long capacity = tile.getFECapacity();
-        if (buffer <= 0 || capacity <= 0) return;
-
-        float height = StorageRenderMath.calculateHeight(buffer, capacity);
+        float height = StorageRenderMath.calculateHeight(tile.getTransferBuffer(), tile.getMaxTransferLimit());
+        if (height <= 0) return;
 
         int color = tile.mClientColor;
         int r = (color >> 16) & 0xFF;
