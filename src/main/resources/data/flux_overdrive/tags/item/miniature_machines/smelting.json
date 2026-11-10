@@ -1,0 +1,10 @@
+{
+  "replace": false,
+  "values": [
+    {"id": "mekanism:energized_smelter", "required": false},
+    {"id": "mekanism:basic_smelting_factory", "required": false},
+    {"id": "mekanism:advanced_smelting_factory", "required": false},
+    {"id": "mekanism:elite_smelting_factory", "required": false},
+    {"id": "mekanism:ultimate_smelting_factory", "required": false}
+  ]
+}

@@ -1,0 +1,8 @@
+{
+  "parent": "block/cube_bottom_top",
+  "textures": {
+    "bottom": "flux_overdrive:block/quantum/battery/cooling_plugin/advanced/bottom",
+    "side": "flux_overdrive:block/quantum/battery/cooling_plugin/advanced/side",
+    "top": "flux_overdrive:block/quantum/battery/cooling_plugin/advanced/top"
+  }
+}

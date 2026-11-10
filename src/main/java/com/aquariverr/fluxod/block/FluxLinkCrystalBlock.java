@@ -9,6 +9,7 @@ import net.minecraft.world.level.block.entity.BlockEntityTicker;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.shapes.CollisionContext;
+import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.BlockGetter;
@@ -22,7 +23,10 @@ import javax.annotation.ParametersAreNonnullByDefault;
 @ParametersAreNonnullByDefault
 public class FluxLinkCrystalBlock extends FluxConnectorBlock {
 
-    private static final VoxelShape SHAPE = Block.box(7, 2, 6, 12, 13, 11);
+    private static final VoxelShape SHAPE = Shapes.or(
+            Block.box(5.4, 2, 5.4, 10.6, 14, 10.6),
+            Block.box(1.3, 5, 10, 4.7, 11, 12),
+            Block.box(11.7, 6, 4, 14.3, 10, 6));
 
     public FluxLinkCrystalBlock(Properties props) {
         super(props);

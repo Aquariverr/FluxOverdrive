@@ -1,0 +1,8 @@
+{
+  "parent": "minecraft:block/orientable",
+  "textures": {
+    "top": "flux_overdrive:block/quantum/entanglement/port/output/top",
+    "front": "flux_overdrive:block/quantum/entanglement/port/output/front",
+    "side": "flux_overdrive:block/quantum/entanglement/port/output/side"
+  }
+}

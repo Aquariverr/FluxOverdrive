@@ -1,0 +1,8 @@
+{
+  "type": "minecraft:block",
+  "pools": [{
+    "rolls": 1.0,
+    "entries": [{"type": "minecraft:item", "name": "flux_overdrive:quantum_entanglement_redstone_port"}],
+    "conditions": [{"condition": "minecraft:survives_explosion"}]
+  }]
+}

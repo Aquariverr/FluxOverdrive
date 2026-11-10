@@ -1,0 +1,21 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    "d d",
+    " p ",
+    "d d"
+  ],
+  "key": {
+    "d": {
+      "item": "fluxnetworks:flux_dust"
+    },
+    "p": {
+      "item": "fluxnetworks:flux_plug"
+    }
+  },
+  "result": {
+    "id": "flux_overdrive:flux_extract_crystal",
+    "count": 1
+  }
+}

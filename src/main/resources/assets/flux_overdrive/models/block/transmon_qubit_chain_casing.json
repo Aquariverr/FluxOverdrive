@@ -1,0 +1,6 @@
+{
+  "parent": "block/cube_all",
+  "textures": {
+    "all": "flux_overdrive:block/ctm/transmon_qubit_chain_casing/00"
+  }
+}

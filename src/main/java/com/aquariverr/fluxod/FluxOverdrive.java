@@ -2,6 +2,7 @@ package com.aquariverr.fluxod;
 
 import com.mojang.logging.LogUtils;
 import com.aquariverr.fluxod.register.FluxOdDataComponents;
+import com.aquariverr.fluxod.network.QuantumBatteryNetwork;
 import net.minecraft.resources.ResourceLocation;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.ModContainer;
@@ -22,6 +23,7 @@ public class FluxOverdrive {
     public FluxOverdrive(IEventBus bus, ModContainer container) {
         container.registerConfig(ModConfig.Type.SERVER, Config.SPEC);
         bus.addListener(Config::onConfigEvent);
+        bus.addListener(QuantumBatteryNetwork::register);
         if (FMLLoader.getDist().isClient()) {
             container.registerExtensionPoint(IConfigScreenFactory.class, ConfigurationScreen::new);
         }

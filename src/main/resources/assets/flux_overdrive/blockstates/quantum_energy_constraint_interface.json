@@ -1,0 +1,7 @@
+{
+  "variants": {
+    "": {
+      "model": "flux_overdrive:block/quantum_energy_constraint_interface"
+    }
+  }
+}

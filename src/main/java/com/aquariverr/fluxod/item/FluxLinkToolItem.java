@@ -1,6 +1,8 @@
 package com.aquariverr.fluxod.item;
 
-import com.aquariverr.fluxod.block.entity.TileFluxLinkCrystal;
+import com.aquariverr.fluxod.block.entity.TileFluxWirelessCrystal;
+import com.aquariverr.fluxod.block.entity.TileQuantumBatteryController;
+import com.aquariverr.fluxod.block.entity.TileQuantumEntanglementController;
 import com.aquariverr.fluxod.register.FluxOdDataComponents;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
@@ -41,7 +43,23 @@ public class FluxLinkToolItem extends Item {
         BlockEntity clickedEntity = level.getBlockEntity(clickedPos);
 
         if (player.isShiftKeyDown()) {
-            if (!(clickedEntity instanceof TileFluxLinkCrystal crystal)) return InteractionResult.PASS;
+            if (clickedEntity instanceof TileQuantumBatteryController battery) {
+                if (level.isClientSide) return InteractionResult.SUCCESS;
+                if (!battery.canPlayerManage(player)) {
+                    player.displayClientMessage(
+                            Component.translatable("message.flux_overdrive.access_denied").withStyle(ChatFormatting.RED),
+                            true);
+                    return InteractionResult.FAIL;
+                }
+                stack.set(FluxOdDataComponents.QUANTUM_BATTERY_BINDER,
+                        GlobalPos.of(level.dimension(), clickedPos));
+                stack.remove(FluxOdDataComponents.FLUX_LINK_BINDER);
+                player.displayClientMessage(
+                        Component.translatable("message.flux_overdrive.quantum_battery_bound")
+                                .withStyle(ChatFormatting.GREEN), true);
+                return InteractionResult.SUCCESS;
+            }
+            if (!(clickedEntity instanceof TileFluxWirelessCrystal crystal)) return InteractionResult.PASS;
             if (level.isClientSide) return InteractionResult.SUCCESS;
             if (!crystal.canPlayerAccess(player)) {
                 player.displayClientMessage(
@@ -50,9 +68,31 @@ public class FluxLinkToolItem extends Item {
                 return InteractionResult.FAIL;
             }
             stack.set(FluxOdDataComponents.FLUX_LINK_BINDER, GlobalPos.of(level.dimension(), clickedPos));
+            stack.remove(FluxOdDataComponents.QUANTUM_BATTERY_BINDER);
             player.displayClientMessage(
                     Component.translatable("message.flux_overdrive.crystal_bound").withStyle(ChatFormatting.GREEN),
                     true);
+            return InteractionResult.SUCCESS;
+        }
+
+        GlobalPos quantumBattery = getQuantumBatteryBound(stack);
+        if (quantumBattery != null) {
+            if (level.isClientSide) return InteractionResult.SUCCESS;
+            if (!(clickedEntity instanceof TileQuantumEntanglementController controller)) {
+                player.displayClientMessage(
+                        Component.translatable("message.flux_overdrive.entanglement_facility_missing")
+                                .withStyle(ChatFormatting.RED), true);
+                return InteractionResult.FAIL;
+            }
+            if (!controller.bindBattery(player, quantumBattery)) {
+                player.displayClientMessage(
+                        Component.translatable("message.flux_overdrive.quantum_battery_bind_failed")
+                                .withStyle(ChatFormatting.RED), true);
+                return InteractionResult.FAIL;
+            }
+            player.displayClientMessage(
+                    Component.translatable("message.flux_overdrive.quantum_battery_bound_to_facility")
+                            .withStyle(ChatFormatting.GREEN), true);
             return InteractionResult.SUCCESS;
         }
 
@@ -68,7 +108,7 @@ public class FluxLinkToolItem extends Item {
 
             BlockPos crystalPos = boundPos.pos();
             BlockEntity crystalEntity = level.isLoaded(crystalPos) ? level.getBlockEntity(crystalPos) : null;
-            if (crystalEntity instanceof TileFluxLinkCrystal crystal) {
+            if (crystalEntity instanceof TileFluxWirelessCrystal crystal) {
                 if (!crystal.canPlayerAccess(player)) {
                     player.displayClientMessage(
                             Component.translatable("message.flux_overdrive.access_denied").withStyle(ChatFormatting.RED),
@@ -87,7 +127,7 @@ public class FluxLinkToolItem extends Item {
                     return InteractionResult.FAIL;
                 } else if (!crystal.isValidLinkTarget(clickedPos, side)) {
                     player.displayClientMessage(
-                            Component.translatable("message.flux_overdrive.invalid_link_target").withStyle(ChatFormatting.RED),
+                            Component.translatable(crystal.getInvalidLinkTargetMessageKey()).withStyle(ChatFormatting.RED),
                             true);
                     return InteractionResult.FAIL;
                 } else {
@@ -120,7 +160,12 @@ public class FluxLinkToolItem extends Item {
             tooltip.add(Component.literal(line).withStyle(ChatFormatting.GRAY));
         }
         GlobalPos pos = getBound(stack);
-        if (pos != null) {
+        GlobalPos quantumBattery = getQuantumBatteryBound(stack);
+        if (quantumBattery != null) {
+            tooltip.add(Component.translatable("tooltip.flux_overdrive.flux_link_tool.quantum_bound",
+                    quantumBattery.pos().toShortString(),
+                    quantumBattery.dimension().location().toString()).withStyle(ChatFormatting.AQUA));
+        } else if (pos != null) {
             tooltip.add(Component.translatable("tooltip.flux_overdrive.flux_link_tool.bound",
                     pos.pos().toShortString(),
                     pos.dimension().location().toString()
@@ -138,5 +183,14 @@ public class FluxLinkToolItem extends Item {
     @Nullable
     public static GlobalPos getBound(ItemStack stack) {
         return stack.get(FluxOdDataComponents.FLUX_LINK_BINDER);
+    }
+
+    public static boolean isQuantumBatteryBound(ItemStack stack) {
+        return stack.has(FluxOdDataComponents.QUANTUM_BATTERY_BINDER);
+    }
+
+    @Nullable
+    public static GlobalPos getQuantumBatteryBound(ItemStack stack) {
+        return stack.get(FluxOdDataComponents.QUANTUM_BATTERY_BINDER);
     }
 }

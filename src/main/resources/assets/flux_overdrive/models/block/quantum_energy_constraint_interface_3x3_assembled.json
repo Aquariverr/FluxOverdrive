@@ -1,0 +1,12 @@
+{
+  "ambientocclusion": false,
+  "elements": [
+    {
+      "from": [-16, -16, -0.02],
+      "to": [32, 32, 0],
+      "faces": {
+        "north": {"uv": [0, 0, 16, 16], "texture": "#panel"}
+      }
+    }
+  ]
+}

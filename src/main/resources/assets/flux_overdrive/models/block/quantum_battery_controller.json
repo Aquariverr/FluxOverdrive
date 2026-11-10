@@ -1,0 +1,9 @@
+{
+  "parent": "block/cube_bottom_top",
+  "textures": {
+    "bottom": "flux_overdrive:block/quantum/battery/controller/frame",
+    "side": "flux_overdrive:block/quantum/battery/controller/frame",
+    "top": "flux_overdrive:block/quantum/battery/controller/top",
+    "particle": "flux_overdrive:block/quantum/battery/controller/frame"
+  }
+}

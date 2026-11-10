@@ -1,0 +1,12 @@
+{
+  "type": "minecraft:block",
+  "pools": [
+    {
+      "bonus_rolls": 0.0,
+      "conditions": [{ "condition": "minecraft:survives_explosion" }],
+      "entries": [{ "type": "minecraft:item", "name": "flux_overdrive:transmon_qubit_chain_casing" }],
+      "rolls": 1.0
+    }
+  ],
+  "random_sequence": "flux_overdrive:blocks/transmon_qubit_chain_casing"
+}

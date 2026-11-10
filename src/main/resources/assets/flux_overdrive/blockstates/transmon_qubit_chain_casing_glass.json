@@ -1,0 +1,7 @@
+{
+  "variants": {
+    "": {
+      "model": "flux_overdrive:block/transmon_qubit_chain_casing_glass"
+    }
+  }
+}

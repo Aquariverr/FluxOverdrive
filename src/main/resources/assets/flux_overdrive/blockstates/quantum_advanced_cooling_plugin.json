@@ -1,0 +1,7 @@
+{
+  "variants": {
+    "": {
+      "model": "flux_overdrive:block/quantum_advanced_cooling_plugin"
+    }
+  }
+}

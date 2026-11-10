@@ -1,0 +1,8 @@
+{
+  "variants": {
+    "facing=north": {"model": "flux_overdrive:block/quantum_energy_constraint_entanglement_port", "y": 180, "uvlock": true},
+    "facing=east": {"model": "flux_overdrive:block/quantum_energy_constraint_entanglement_port", "y": 270, "uvlock": true},
+    "facing=south": {"model": "flux_overdrive:block/quantum_energy_constraint_entanglement_port", "uvlock": true},
+    "facing=west": {"model": "flux_overdrive:block/quantum_energy_constraint_entanglement_port", "y": 90, "uvlock": true}
+  }
+}

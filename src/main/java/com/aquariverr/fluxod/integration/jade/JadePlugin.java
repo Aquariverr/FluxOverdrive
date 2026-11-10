@@ -2,12 +2,16 @@ package com.aquariverr.fluxod.integration.jade;
 
 import com.aquariverr.fluxod.FluxOverdrive;
 import com.aquariverr.fluxod.block.FluxAutoLinkCrystalBlock;
+import com.aquariverr.fluxod.block.FluxAutoExtractCrystalBlock;
+import com.aquariverr.fluxod.block.FluxExtractCrystalBlock;
 import com.aquariverr.fluxod.block.FluxFEStorageBlock;
 import com.aquariverr.fluxod.block.FluxLinkCrystalBlock;
 import com.aquariverr.fluxod.block.FluxStorageTerminalBlock;
-import com.aquariverr.fluxod.block.entity.TileFluxAutoLinkCrystal;
 import com.aquariverr.fluxod.block.entity.TileFluxFEStorage;
-import com.aquariverr.fluxod.block.entity.TileFluxLinkCrystal;
+import com.aquariverr.fluxod.block.entity.TileFluxWirelessCrystal;
+import com.aquariverr.fluxod.block.entity.TileFluxAutoCrystal;
+import com.aquariverr.fluxod.block.QuantumBatteryControllerBlock;
+import com.aquariverr.fluxod.block.entity.TileQuantumBatteryController;
 
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
@@ -24,6 +28,7 @@ import snownee.jade.api.ui.Element;
 import snownee.jade.api.ui.IElementHelper;
 
 import javax.annotation.Nullable;
+import java.util.Locale;
 import sonar.fluxnetworks.api.FluxTranslate;
 import sonar.fluxnetworks.api.device.FluxDeviceType;
 import sonar.fluxnetworks.api.energy.EnergyType;
@@ -50,22 +55,28 @@ public class JadePlugin implements IWailaPlugin {
         registerFnBlocks(registration, BuiltinRemover.INSTANCE);
         registerFnBlocks(registration, FluxDeviceProvider.INSTANCE);
         registration.registerBlockComponent(BuiltinRemover.INSTANCE, FluxFEStorageBlock.class);
-        registration.registerBlockComponent(BuiltinRemover.INSTANCE, FluxLinkCrystalBlock.class);
-        registration.registerBlockComponent(BuiltinRemover.INSTANCE, FluxAutoLinkCrystalBlock.class);
+         registration.registerBlockComponent(BuiltinRemover.INSTANCE, FluxLinkCrystalBlock.class);
+         registration.registerBlockComponent(BuiltinRemover.INSTANCE, FluxExtractCrystalBlock.class);
+         registration.registerBlockComponent(BuiltinRemover.INSTANCE, FluxAutoLinkCrystalBlock.class);
+        registration.registerBlockComponent(BuiltinRemover.INSTANCE, FluxAutoExtractCrystalBlock.class);
         registration.registerBlockComponent(BuiltinRemover.INSTANCE,
                 com.aquariverr.fluxod.block.FluxStorageBlock.Ender.class);
         registration.registerBlockComponent(BuiltinRemover.INSTANCE,
                 com.aquariverr.fluxod.block.FluxStorageBlock.Nether.class);
         registration.registerBlockComponent(BuiltinRemover.INSTANCE, FluxStorageTerminalBlock.class);
+        registration.registerBlockComponent(BuiltinRemover.INSTANCE, QuantumBatteryControllerBlock.class);
 
         registration.registerBlockComponent(FluxFEStorageProvider.INSTANCE, FluxFEStorageBlock.class);
-        registration.registerBlockComponent(FluxLinkCrystalProvider.INSTANCE, FluxLinkCrystalBlock.class);
-        registration.registerBlockComponent(FluxLinkCrystalProvider.INSTANCE, FluxAutoLinkCrystalBlock.class);
+         registration.registerBlockComponent(FluxLinkCrystalProvider.INSTANCE, FluxLinkCrystalBlock.class);
+         registration.registerBlockComponent(FluxLinkCrystalProvider.INSTANCE, FluxExtractCrystalBlock.class);
+         registration.registerBlockComponent(FluxLinkCrystalProvider.INSTANCE, FluxAutoLinkCrystalBlock.class);
+        registration.registerBlockComponent(FluxLinkCrystalProvider.INSTANCE, FluxAutoExtractCrystalBlock.class);
         registration.registerBlockComponent(FluxOverdriveStorageProvider.INSTANCE,
                 com.aquariverr.fluxod.block.FluxStorageBlock.Ender.class);
         registration.registerBlockComponent(FluxOverdriveStorageProvider.INSTANCE,
                 com.aquariverr.fluxod.block.FluxStorageBlock.Nether.class);
         registration.registerBlockComponent(FluxOverdriveStorageProvider.INSTANCE, FluxStorageTerminalBlock.class);
+        registration.registerBlockComponent(QuantumBatteryProvider.INSTANCE, QuantumBatteryControllerBlock.class);
     }
 
     private static void registerFnBlocks(IWailaClientRegistration reg, IBlockComponentProvider provider) {
@@ -237,7 +248,7 @@ public class JadePlugin implements IWailaPlugin {
         @Override
         public void appendTooltip(ITooltip tooltip, BlockAccessor accessor, IPluginConfig config) {
             BlockEntity be = accessor.getBlockEntity();
-            if (!(be instanceof TileFluxLinkCrystal crystal)) return;
+            if (!(be instanceof TileFluxWirelessCrystal crystal)) return;
 
             CompoundTag serverData = accessor.getServerData();
 
@@ -262,7 +273,7 @@ public class JadePlugin implements IWailaPlugin {
             if (serverData.contains(FluxDeviceServerProvider.KEY_AUTO_LINK_COUNT)) {
                 autoCount = serverData.getInt(FluxDeviceServerProvider.KEY_AUTO_LINK_COUNT);
                 hasAutoCount = true;
-            } else if (be instanceof TileFluxAutoLinkCrystal autoCrystal) {
+            } else if (be instanceof TileFluxAutoCrystal autoCrystal) {
                 autoCount = autoCrystal.getAutoLinkedTargets().size();
                 hasAutoCount = true;
             }
@@ -314,6 +325,94 @@ public class JadePlugin implements IWailaPlugin {
         }
     }
 
+    enum QuantumBatteryProvider implements IBlockComponentProvider {
+        INSTANCE;
+
+        @Override
+        public void appendTooltip(ITooltip tooltip, BlockAccessor accessor, IPluginConfig config) {
+            BlockEntity be = accessor.getBlockEntity();
+            if (!(be instanceof TileQuantumBatteryController controller)) return;
+
+            CompoundTag data = accessor.getServerData();
+            int tier = data.contains(FluxDeviceServerProvider.KEY_QUANTUM_TIER)
+                    ? data.getInt(FluxDeviceServerProvider.KEY_QUANTUM_TIER)
+                    : controller.getStructureTier();
+            boolean suspended = data.contains(FluxDeviceServerProvider.KEY_QUANTUM_SUSPENDED)
+                    ? data.getBoolean(FluxDeviceServerProvider.KEY_QUANTUM_SUSPENDED)
+                    : controller.isStructureSuspended();
+            boolean ready = data.contains(FluxDeviceServerProvider.KEY_QUANTUM_READY)
+                    ? data.getBoolean(FluxDeviceServerProvider.KEY_QUANTUM_READY)
+                    : controller.isStructureReady();
+            boolean constraintPowered = data.contains(FluxDeviceServerProvider.KEY_QUANTUM_CONSTRAINT_POWERED)
+                    ? data.getBoolean(FluxDeviceServerProvider.KEY_QUANTUM_CONSTRAINT_POWERED)
+                    : controller.isConstraintPowered();
+            int stabilityBasisPoints = data.contains(FluxDeviceServerProvider.KEY_QUANTUM_STABILITY)
+                    ? data.getInt(FluxDeviceServerProvider.KEY_QUANTUM_STABILITY)
+                    : controller.getStabilityBasisPoints();
+            double temperatureKelvin = data.contains(FluxDeviceServerProvider.KEY_QUANTUM_TEMPERATURE)
+                    ? data.getDouble(FluxDeviceServerProvider.KEY_QUANTUM_TEMPERATURE)
+                    : controller.getTemperatureKelvin();
+            double coolingTargetKelvin = data.contains(FluxDeviceServerProvider.KEY_QUANTUM_COOLING_TARGET)
+                    ? data.getDouble(FluxDeviceServerProvider.KEY_QUANTUM_COOLING_TARGET)
+                    : controller.getEffectiveCoolingTargetKelvin();
+            boolean coolingActive = data.contains(FluxDeviceServerProvider.KEY_QUANTUM_COOLING_ACTIVE)
+                    ? data.getBoolean(FluxDeviceServerProvider.KEY_QUANTUM_COOLING_ACTIVE)
+                    : controller.isCoolingActive();
+            FluxDeviceProvider.addNetworkName(tooltip, controller);
+            FluxDeviceProvider.addTransferInfo(tooltip, controller, data);
+            tooltip.add(IElementHelper.get().text(Component.translatable(
+                    "jade.flux_overdrive.quantum_battery.tier", tier)));
+            if (data.contains(FluxDeviceServerProvider.KEY_QUANTUM_ENERGY)
+                    && data.contains(FluxDeviceServerProvider.KEY_QUANTUM_CAPACITY)) {
+                tooltip.add(IElementHelper.get().text(Component.translatable(
+                        "jade.flux_overdrive.quantum_battery.energy",
+                        data.getString(FluxDeviceServerProvider.KEY_QUANTUM_ENERGY),
+                        data.getString(FluxDeviceServerProvider.KEY_QUANTUM_CAPACITY))
+                        .withStyle(ChatFormatting.AQUA)));
+            }
+            tooltip.add(IElementHelper.get().text(Component.translatable(
+                    "jade.flux_overdrive.quantum_battery.stability",
+                    TileQuantumBatteryController.formatStabilityBasisPoints(stabilityBasisPoints))
+                    .withStyle(constraintPowered && stabilityBasisPoints > 0
+                            ? ChatFormatting.AQUA : ChatFormatting.YELLOW)));
+            tooltip.add(IElementHelper.get().text(Component.translatable(
+                    "jade.flux_overdrive.quantum_battery.temperature",
+                    String.format(Locale.ROOT, "%.1f K", temperatureKelvin))));
+            if (coolingTargetKelvin >= 0.0) {
+                tooltip.add(IElementHelper.get().text(Component.translatable(
+                        coolingActive
+                                ? "jade.flux_overdrive.quantum_battery.cooling_active"
+                                : "jade.flux_overdrive.quantum_battery.cooling_idle",
+                        String.format(Locale.ROOT, "%.0f K", coolingTargetKelvin))
+                        .withStyle(coolingActive ? ChatFormatting.AQUA : ChatFormatting.GRAY)));
+            }
+            if (suspended) {
+                tooltip.add(IElementHelper.get().text(Component.translatable(
+                        "jade.flux_overdrive.quantum_battery.suspended").withStyle(ChatFormatting.YELLOW)));
+            } else if (!ready) {
+                tooltip.add(IElementHelper.get().text(Component.translatable(
+                        "jade.flux_overdrive.quantum_battery.not_ready").withStyle(ChatFormatting.YELLOW)));
+            } else if (!constraintPowered && stabilityBasisPoints == 0) {
+                tooltip.add(IElementHelper.get().text(Component.translatable(
+                        "jade.flux_overdrive.quantum_battery.stability_zero").withStyle(ChatFormatting.YELLOW)));
+            } else if (!constraintPowered) {
+                tooltip.add(IElementHelper.get().text(Component.translatable(
+                        "jade.flux_overdrive.quantum_battery.constraint_low").withStyle(ChatFormatting.YELLOW)));
+            } else if (stabilityBasisPoints < 10_000) {
+                tooltip.add(IElementHelper.get().text(Component.translatable(
+                        "jade.flux_overdrive.quantum_battery.recovering").withStyle(ChatFormatting.GREEN)));
+            }
+            tooltip.add(IElementHelper.get().text(Component.translatable(
+                    "jade.flux_overdrive.quantum_battery.transfer",
+                    EnergyType.FE.getUsageCompact(controller.getTransferHandler().getLimit()))));
+        }
+
+        @Override
+        public ResourceLocation getUid() {
+            return FluxOverdrive.location("quantum_battery");
+        }
+    }
+
     private static class EnergyBarElement extends Element {
 
         private static final int WIDTH = 100;
@@ -360,6 +459,16 @@ public class JadePlugin implements IWailaPlugin {
         static final String KEY_TRANSFER_INFO = "fod.transferInfo";
         static final String KEY_LINK_COUNT = "fod.linkCount";
         static final String KEY_AUTO_LINK_COUNT = "fod.autoLinkCount";
+        static final String KEY_QUANTUM_TIER = "fod.quantumTier";
+        static final String KEY_QUANTUM_SUSPENDED = "fod.quantumSuspended";
+        static final String KEY_QUANTUM_READY = "fod.quantumReady";
+        static final String KEY_QUANTUM_CONSTRAINT_POWERED = "fod.quantumConstraintPowered";
+        static final String KEY_QUANTUM_STABILITY = "fod.quantumStability";
+        static final String KEY_QUANTUM_ENERGY = "fod.quantumEnergy";
+        static final String KEY_QUANTUM_CAPACITY = "fod.quantumCapacity";
+        static final String KEY_QUANTUM_TEMPERATURE = "fod.quantumTemperature";
+        static final String KEY_QUANTUM_COOLING_TARGET = "fod.quantumCoolingTarget";
+        static final String KEY_QUANTUM_COOLING_ACTIVE = "fod.quantumCoolingActive";
 
         @Override
         public void appendServerData(CompoundTag tag, BlockAccessor accessor) {
@@ -371,11 +480,23 @@ public class JadePlugin implements IWailaPlugin {
                 tag.putString(KEY_TRANSFER_INFO, transferInfo);
             }
 
-            if (be instanceof TileFluxLinkCrystal crystal) {
+            if (be instanceof TileFluxWirelessCrystal crystal) {
                 tag.putInt(KEY_LINK_COUNT, crystal.getLinkedTargets().size());
             }
-            if (be instanceof TileFluxAutoLinkCrystal autoCrystal) {
+            if (be instanceof TileFluxAutoCrystal autoCrystal) {
                 tag.putInt(KEY_AUTO_LINK_COUNT, autoCrystal.getAutoLinkedTargets().size());
+            }
+            if (be instanceof TileQuantumBatteryController controller) {
+                tag.putInt(KEY_QUANTUM_TIER, controller.getStructureTier());
+                tag.putBoolean(KEY_QUANTUM_SUSPENDED, controller.isStructureSuspended());
+                tag.putBoolean(KEY_QUANTUM_READY, controller.isStructureReady());
+                tag.putBoolean(KEY_QUANTUM_CONSTRAINT_POWERED, controller.isConstraintPowered());
+                tag.putInt(KEY_QUANTUM_STABILITY, controller.getStabilityBasisPoints());
+                tag.putString(KEY_QUANTUM_ENERGY, controller.getStoredEnergyCompact());
+                tag.putString(KEY_QUANTUM_CAPACITY, controller.getCapacityCompact());
+                tag.putDouble(KEY_QUANTUM_TEMPERATURE, controller.getTemperatureKelvin());
+                tag.putDouble(KEY_QUANTUM_COOLING_TARGET, controller.getEffectiveCoolingTargetKelvin());
+                tag.putBoolean(KEY_QUANTUM_COOLING_ACTIVE, controller.isCoolingActive());
             }
         }
 

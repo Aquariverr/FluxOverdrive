@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:block",
+  "pools": [{
+    "rolls": 1.0,
+    "entries": [{
+      "type": "minecraft:item",
+      "name": "flux_overdrive:miniature_universe",
+      "functions": [{
+        "function": "minecraft:copy_components",
+        "include": ["flux_overdrive:miniature_universe_state"],
+        "source": "block_entity"
+      }]
+    }],
+    "conditions": [{"condition": "minecraft:survives_explosion"}]
+  }]
+}

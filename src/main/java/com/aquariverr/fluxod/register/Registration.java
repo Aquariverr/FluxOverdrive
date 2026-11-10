@@ -18,6 +18,11 @@ public class Registration {
         event.register(BuiltInRegistries.ITEM.key(), RegistryItems::register);
         event.register(BuiltInRegistries.BLOCK_ENTITY_TYPE.key(), RegistryBlockEntityTypes::register);
         event.register(BuiltInRegistries.CREATIVE_MODE_TAB.key(), RegistryCreativeModeTabs::register);
+        event.register(BuiltInRegistries.MENU.key(), RegistryMenuTypes::register);
+        event.register(BuiltInRegistries.RECIPE_TYPE.key(), helper -> helper.register(FluxOverdrive.location("miniature_upgrade"),
+                com.aquariverr.fluxod.miniature.upgrade.MiniatureUpgradeRecipe.TYPE));
+        event.register(BuiltInRegistries.RECIPE_SERIALIZER.key(), helper -> helper.register(FluxOverdrive.location("miniature_upgrade"),
+                com.aquariverr.fluxod.miniature.upgrade.MiniatureUpgradeRecipe.SERIALIZER));
     }
 
     @SubscribeEvent

@@ -1,0 +1,8 @@
+{
+  "parent": "block/cube_all",
+  "ambientocclusion": false,
+  "render_type": "translucent",
+  "textures": {
+    "all": "flux_overdrive:block/ctm/transmon_qubit_chain_casing_glass/00"
+  }
+}

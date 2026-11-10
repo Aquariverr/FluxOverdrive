@@ -5,6 +5,7 @@ bin
 .metadata
 .classpath
 .project
+.eclipse
 
 # idea
 out
@@ -24,3 +25,9 @@ runs
 run-data
 
 repo
+logs
+.vscode
+.gradle-user
+*.log
+*.hprof
+hs_err_pid*

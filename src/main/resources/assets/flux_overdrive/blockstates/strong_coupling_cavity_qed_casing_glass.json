@@ -1,0 +1,7 @@
+{
+  "variants": {
+    "": {
+      "model": "flux_overdrive:block/strong_coupling_cavity_qed_casing_glass"
+    }
+  }
+}

@@ -1,0 +1,23 @@
+{
+  "required": true,
+  "minVersion": "0.8",
+  "package": "com.aquariverr.fluxod.mixin",
+  "compatibilityLevel": "JAVA_21",
+  "mixins": [
+    "NetworkStatisticsMixin",
+    "PhantomFluxDeviceMixin",
+    "RemoteFluxMessagesMixin",
+    "ServerFluxNetworkMixin",
+    "TileFluxDeviceMixin",
+    "accessor.TileFluxDeviceAccessor"
+  ],
+  "client": [
+    "client.GuiTabConnectionsMixin",
+    "client.GuiTabStatisticsMixin",
+    "client.RegistryMenuTypesMixin",
+    "client.RemoteFluxClientMessagesMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}

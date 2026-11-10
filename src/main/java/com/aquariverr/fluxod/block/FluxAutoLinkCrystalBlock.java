@@ -14,6 +14,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.block.state.properties.BooleanProperty;
 import net.minecraft.world.phys.shapes.CollisionContext;
+import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
 import sonar.fluxnetworks.common.block.FluxConnectorBlock;
 import sonar.fluxnetworks.common.device.TileFluxDevice;
@@ -25,7 +26,12 @@ import javax.annotation.ParametersAreNonnullByDefault;
 @ParametersAreNonnullByDefault
 public class FluxAutoLinkCrystalBlock extends FluxConnectorBlock {
 
-    private static final VoxelShape SHAPE = Block.box(7, 2, 6, 12, 13, 11);
+    private static final VoxelShape SHAPE = Shapes.or(
+            Block.box(5.4, 2, 5.4, 10.6, 15, 10.6),
+            Block.box(2.2, 9, 2.2, 4.8, 14, 4.8),
+            Block.box(11.2, 5, 2.2, 13.8, 10, 4.8),
+            Block.box(2.2, 5, 11.2, 4.8, 10, 13.8),
+            Block.box(11.2, 9, 11.2, 13.8, 14, 13.8));
     private static final BooleanProperty POWERED = BlockStateProperties.POWERED;
 
     public FluxAutoLinkCrystalBlock(Properties props) {

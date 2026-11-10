@@ -1,0 +1,5 @@
+{
+  "variants": {
+    "": {"model": "flux_overdrive:block/quantum_temperature_feedback_plugin"}
+  }
+}

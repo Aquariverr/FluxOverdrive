@@ -1,0 +1,7 @@
+{
+  "variants": {
+    "": {
+      "model": "flux_overdrive:block/quantum_quench_fuse_tier_1"
+    }
+  }
+}

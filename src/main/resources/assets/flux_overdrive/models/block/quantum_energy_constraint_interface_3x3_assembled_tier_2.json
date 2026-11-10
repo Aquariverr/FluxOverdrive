@@ -1,0 +1,7 @@
+{
+  "parent": "flux_overdrive:block/quantum_energy_constraint_interface_3x3_assembled",
+  "textures": {
+    "panel": "flux_overdrive:block/quantum/battery/energy_constraint_interface/3x3/assembled/tier_2",
+    "particle": "flux_overdrive:block/quantum/battery/energy_constraint_interface/3x3/assembled/tier_2"
+  }
+}

@@ -1,0 +1,8 @@
+{
+  "parent": "block/cube_bottom_top",
+  "textures": {
+    "bottom": "flux_overdrive:block/quantum/battery/quench_fuse/tier_1/bottom",
+    "side": "flux_overdrive:block/quantum/battery/quench_fuse/tier_1/side",
+    "top": "flux_overdrive:block/quantum/battery/quench_fuse/tier_1/top"
+  }
+}

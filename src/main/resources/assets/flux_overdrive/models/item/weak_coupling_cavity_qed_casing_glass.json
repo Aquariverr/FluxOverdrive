@@ -1,0 +1,7 @@
+{
+  "parent": "block/cube_all",
+  "render_type": "translucent",
+  "textures": {
+    "all": "flux_overdrive:block/ctm/weak_coupling_cavity_qed_casing_glass/item"
+  }
+}

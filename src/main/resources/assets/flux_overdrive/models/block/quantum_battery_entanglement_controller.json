@@ -1,0 +1,10 @@
+{
+  "parent": "block/cube_bottom_top",
+  "render_type": "solid",
+  "textures": {
+    "bottom": "flux_overdrive:block/quantum/entanglement/controller/side",
+    "side": "flux_overdrive:block/quantum/entanglement/controller/side",
+    "top": "flux_overdrive:block/quantum/entanglement/controller/top",
+    "particle": "flux_overdrive:block/quantum/entanglement/controller/side"
+  }
+}

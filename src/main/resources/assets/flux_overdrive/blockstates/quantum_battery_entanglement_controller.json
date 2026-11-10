@@ -1,0 +1,8 @@
+{
+  "variants": {
+    "facing=north": {"model": "flux_overdrive:block/quantum_battery_entanglement_controller", "y": 180, "uvlock": true},
+    "facing=east": {"model": "flux_overdrive:block/quantum_battery_entanglement_controller", "y": 270, "uvlock": true},
+    "facing=south": {"model": "flux_overdrive:block/quantum_battery_entanglement_controller", "uvlock": true},
+    "facing=west": {"model": "flux_overdrive:block/quantum_battery_entanglement_controller", "y": 90, "uvlock": true}
+  }
+}
